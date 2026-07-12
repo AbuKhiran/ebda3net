@@ -78,28 +78,44 @@
             </div>
         </header>
 
-        <!-- قسم الإحصائيات الحية لليوم (تم إضافة كلاسات الضغط والتفاعل الذكي هنا) -->
+        <!-- قسم الإحصائيات الحية لليوم (تم إضافة أزرار X ديناميكية هنا) -->
         <section class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div onclick="clickStatFilter('connect')" class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md cursor-pointer hover:border-emerald-500/40 hover:scale-[1.02] active:scale-[0.99] transition-all duration-200 group">
-                <div id="stat-lbl-connects" class="text-gray-400 text-sm font-medium group-hover:text-emerald-300 transition-colors">عدد المتصلين (اليوم)</div>
+            <!-- مربع المتصلين -->
+            <div onclick="clickStatFilter('connect')" id="box-connect" class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md cursor-pointer hover:border-emerald-500/40 hover:scale-[1.02] active:scale-[0.99] transition-all duration-200 group relative">
+                <div class="flex justify-between items-start">
+                    <div id="stat-lbl-connects" class="text-gray-400 text-sm font-medium group-hover:text-emerald-300 transition-colors">عدد المتصلين (اليوم)</div>
+                    <button onclick="clearBoxFilter(event)" id="btn-x-connect" class="hidden bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-400 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold transition-all duration-150 z-10">✕</button>
+                </div>
                 <div id="stat-connects" class="text-3xl font-bold text-emerald-400 mt-2">0</div>
                 <div id="stat-sub-connects" class="text-[10px] text-emerald-500/80 mt-1">✓ جلسات اتصال PPP ناجحة</div>
             </div>
 
-            <div onclick="clickStatFilter('disconnect')" class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md cursor-pointer hover:border-amber-500/40 hover:scale-[1.02] active:scale-[0.99] transition-all duration-200 group">
-                <div id="stat-lbl-disconnects" class="text-gray-400 text-sm font-medium group-hover:text-amber-300 transition-colors">عدد قطع الاتصال (اليوم)</div>
+            <!-- مربع قطع الاتصال -->
+            <div onclick="clickStatFilter('disconnect')" id="box-disconnect" class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md cursor-pointer hover:border-amber-500/40 hover:scale-[1.02] active:scale-[0.99] transition-all duration-200 group relative">
+                <div class="flex justify-between items-start">
+                    <div id="stat-lbl-disconnects" class="text-gray-400 text-sm font-medium group-hover:text-amber-300 transition-colors">عدد قطع الاتصال (اليوم)</div>
+                    <button onclick="clearBoxFilter(event)" id="btn-x-disconnect" class="hidden bg-amber-500/20 hover:bg-amber-500/40 text-amber-400 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold transition-all duration-150 z-10">✕</button>
+                </div>
                 <div id="stat-disconnects" class="text-3xl font-bold text-amber-400 mt-2">0</div>
                 <div id="stat-sub-disconnects" class="text-[10px] text-amber-500/80 mt-1">⚠ عمليات خروج أو فقدان إشارة</div>
             </div>
 
-            <div onclick="clickStatFilter('top-user')" class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md cursor-pointer hover:border-red-500/40 hover:scale-[1.02] active:scale-[0.99] transition-all duration-200 group">
-                <div id="stat-lbl-top" class="text-gray-400 text-sm font-medium group-hover:text-red-300 transition-colors">الأكثر فصلاً (اليوم)</div>
+            <!-- مربع الأكثر فصلاً -->
+            <div onclick="clickStatFilter('top-user')" id="box-top-user" class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md cursor-pointer hover:border-red-500/40 hover:scale-[1.02] active:scale-[0.99] transition-all duration-200 group relative">
+                <div class="flex justify-between items-start">
+                    <div id="stat-lbl-top" class="text-gray-400 text-sm font-medium group-hover:text-red-300 transition-colors">الأكثر فصلاً (اليوم)</div>
+                    <button onclick="clearBoxFilter(event)" id="btn-x-top-user" class="hidden bg-red-500/20 hover:bg-red-500/40 text-red-400 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold transition-all duration-150 z-10">✕</button>
+                </div>
                 <div id="stat-top-disconnect" class="text-xl font-bold text-red-400 mt-2 truncate">---</div>
                 <div id="stat-top-disconnect-count" class="text-[10px] text-red-500/80 mt-1">عدد المرات: 0</div>
             </div>
 
-            <div onclick="clickStatFilter('errors')" class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md cursor-pointer hover:border-rose-500/40 hover:scale-[1.02] active:scale-[0.99] transition-all duration-200 group">
-                <div id="stat-lbl-errors" class="text-gray-400 text-sm font-medium group-hover:text-rose-300 transition-colors">مشاكل النظام والأخطاء (اليوم)</div>
+            <!-- مربع المشاكل والأخطاء -->
+            <div onclick="clickStatFilter('errors')" id="box-errors" class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md cursor-pointer hover:border-rose-500/40 hover:scale-[1.02] active:scale-[0.99] transition-all duration-200 group relative">
+                <div class="flex justify-between items-start">
+                    <div id="stat-lbl-errors" class="text-gray-400 text-sm font-medium group-hover:text-rose-300 transition-colors">مشاكل النظام والأخطاء (اليوم)</div>
+                    <button onclick="clearBoxFilter(event)" id="btn-x-errors" class="hidden bg-rose-500/20 hover:bg-rose-500/40 text-rose-400 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold transition-all duration-150 z-10">✕</button>
+                </div>
                 <div id="stat-errors" class="text-3xl font-bold text-rose-500 mt-2">0</div>
                 <div id="stat-sub-errors" class="text-[10px] text-rose-400/80 mt-1">⛔ أخطاء توثيق أو مشاكل كوابل</div>
             </div>
@@ -163,8 +179,8 @@
         let timeLeft = 60; 
         let lastCheckedId = null;
         let currentLang = 'ar';
-        let globalTopUser = "---"; // لمتابعة أكثر مستخدم فصلاً لليوم بشكل ديناميكي
-        let activeStatFilter = null; // لمتابعة إذا كان هناك فلتر مربعات نشط حالياً
+        let globalTopUser = "---"; 
+        let activeStatFilter = null; 
 
         const i18n = {
             ar: {
@@ -325,10 +341,14 @@
 
         // دالة الفلترة السريعة عند النقر على المربعات العلوية
         function clickStatFilter(mode) {
+            if (activeStatFilter === mode) return; // لمنع إعادة التهيئة إذا كان نفس الفلتر مضغوطاً
+
+            activeStatFilter = mode;
+
             // تهيئة حقول البحث اليدوية لتفادي التداخل
             document.getElementById('filter-user').value = "";
             document.getElementById('filter-type').value = "";
-            document.getElementById('filter-date').value = "today"; // جميع إحصائيات المربعات تخص اليوم
+            document.getElementById('filter-date').value = "today"; 
 
             if (mode === 'connect') {
                 document.getElementById('filter-type').value = "PPP Connect";
@@ -338,14 +358,18 @@
                 if (globalTopUser && globalTopUser !== "---") {
                     document.getElementById('filter-user').value = globalTopUser;
                 }
-            } else if (mode === 'errors') {
-                // نضع وسام خاص لتنفيذ فلترة المشاكل المجمعة داخل دالة applyFilters
-                activeStatFilter = 'errors';
-                applyFilters();
-                return;
             }
 
-            activeStatFilter = null; // إعادة تعيين الوسام الخاص في الحالات الأخرى
+            applyFilters();
+        }
+
+        // دالة زر X المخصصة لإلغاء الفلترة وإعادة تهيئة البيانات فوراً
+        function clearBoxFilter(event) {
+            event.stopPropagation(); // منع انتقال النقرة للمربع نفسه
+            activeStatFilter = null;
+            document.getElementById('filter-user').value = "";
+            document.getElementById('filter-type').value = "";
+            document.getElementById('filter-date').value = "today";
             applyFilters();
         }
 
@@ -423,7 +447,7 @@
                     topUser = user;
                 }
             }
-            globalTopUser = topUser; // حفظه في المتغير العام للوصول إليه عند الضغط
+            globalTopUser = topUser; 
             document.getElementById('stat-top-disconnect').innerText = topUser;
             document.getElementById('stat-top-disconnect-count').innerText = `${i18n[currentLang].stTopSub} ${topCount}`;
 
@@ -439,14 +463,18 @@
 
             let filtered = [...allLogs];
 
+            // إذا قام المستخدم بتعديل الفلاتر اليدوية، نلغي تفعيل المربعات العلوية تلقائياً
+            if (activeStatFilter && activeStatFilter !== 'errors' && !typeQuery && !userQuery) {
+                activeStatFilter = null;
+            }
+
             // 1. فلترة التاريخ
             if (dateQuery === 'today') {
                 filtered = filtered.filter(log => log.created_at && log.created_at.startsWith(todayStr));
             }
 
-            // 2. فلترة نوع السجل (سواء من المربعات العلوية أو من القائمة المنسدلة)
+            // 2. فلترة نوع السجل
             if (activeStatFilter === 'errors') {
-                // إذا تم النقر على مربع الأخطاء والمشاكل، نجلب كل أنواع الأخطاء معاً لليوم
                 filtered = filtered.filter(log => log.log_type === 'System Error' || log.log_type === 'Link Down' || log.log_type === 'PPP Auth Error');
             } else if (typeQuery) {
                 filtered = filtered.filter(log => log.log_type === typeQuery);
@@ -456,6 +484,9 @@
             if (userQuery) {
                 filtered = filtered.filter(log => log.username && log.username.toLowerCase().includes(userQuery));
             }
+
+            // تحديث ستايل المربعات والتحكم بظهور أزرار X
+            updateStatBoxUI();
 
             // ترتيب السجلات حسب الأولوية والوقت
             const typePriority = { 'System Error': 1, 'Link Down': 2, 'PPP Auth Error': 3, 'PPP Disconnect': 4, 'PPP Connect': 5, 'General Info': 6 };
@@ -470,6 +501,35 @@
             document.getElementById('lbl-total-displayed').innerHTML = `${l.totalDisp} <span id="log-count" class="font-bold text-teal-400">${filtered.length}</span>`;
             
             renderTable(filtered);
+        }
+
+        // دالة التحكم بشكل المربعات وظهور زر الـ X بناءً على الفلتر النشط
+        function updateStatBoxUI() {
+            const boxes = {
+                'connect': { wrapper: document.getElementById('box-connect'), btnX: document.getElementById('btn-x-connect'), border: 'border-emerald-500' },
+                'disconnect': { wrapper: document.getElementById('box-disconnect'), btnX: document.getElementById('btn-x-disconnect'), border: 'border-amber-500' },
+                'top-user': { wrapper: document.getElementById('box-top-user'), btnX: document.getElementById('btn-x-top-user'), border: 'border-red-500' },
+                'errors': { wrapper: document.getElementById('box-errors'), btnX: document.getElementById('btn-x-errors'), border: 'border-rose-500' }
+            };
+
+            for (const key in boxes) {
+                if (boxes[key].wrapper && boxes[key].btnX) {
+                    if (activeStatFilter === key) {
+                        // إظهار البوردر الملون والإضاءة وزر X للمربع المفلتر حالياً
+                        boxes[key].wrapper.classList.add(boxes[key].border, 'bg-gray-800/90', 'ring-1', 'ring-opacity-50');
+                        if(key === 'connect') boxes[key].wrapper.classList.add('ring-emerald-500');
+                        if(key === 'disconnect') boxes[key].wrapper.classList.add('ring-amber-500');
+                        if(key === 'top-user') boxes[key].wrapper.classList.add('ring-red-500');
+                        if(key === 'errors') boxes[key].wrapper.classList.add('ring-rose-500');
+                        
+                        boxes[key].btnX.classList.remove('hidden');
+                    } else {
+                        // إرجاع المربعات الأخرى لشكلها العادي وإخفاء زر X عنها
+                        boxes[key].wrapper.classList.remove('border-emerald-500', 'border-amber-500', 'border-red-500', 'border-rose-500', 'ring-1', 'ring-emerald-500', 'ring-amber-500', 'ring-red-500', 'ring-rose-500');
+                        boxes[key].btnX.classList.add('hidden');
+                    }
+                }
+            }
         }
 
         function renderTable(data) {
