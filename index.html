@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم شبكة ابداع نت - تسجيل الدخول</title>
+    <title>لوحة تحكم شبكة ابداع net - تسجيل الدخول</title>
     <!-- Tailwind CSS للتصميم -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- مكتبة Supabase -->
@@ -170,15 +170,13 @@
     </div>
 
     <script>
-        // دالة حماية وتفكيك حزم الاتصال المشفرة بشكل معقد لمنع برامج فحص الشفرات التلقائية
-        function _decodeChunk(arr) {
-            return arr.map(c => String.fromCharCode(c ^ 42)).join('');
-        }
-        // البيانات مشفرة باستخدام XOR لمنع القراءة المباشرة من لوحة المطور
-        const _uChunks = [63, 62, 62, 38, 79, 127, 101, 103, 117, 110, 101, 115, 121, 111, 117, 103, 111, 115, 121, 111, 107, 110, 126, 99, 126, 120, 107, 126, 110, 117, 121, 40, 113, 107];
-        const _kChunks = [37, 56, 43, 34, 123, 115, 104, 114, 111, 121, 112, 103, 102, 118, 115, 107, 49, 33, 121, 33, 41, 124, 122, 114, 43, 112, 116, 37, 45, 33, 37, 36, 117, 43, 121, 43, 47, 33, 109, 39, 43, 101, 47];
+        // إعدادات وبيانات الاتصال المباشرة والصريحة بسوبابيس بدون أي تشفير
+        const supabaseUrl = 'https://uuxmwedosgowosmwiextetjexwugk.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ1dXhtd2Vkb3Nnb3dvc213aWV4dGV0amV4d3VnayIsInJlZiI6InV1eG13ZWRvc2dvd29zbXdpZXh0ZXRqZXh3dWdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTY4ODg3NjYsImV4cCI6MjAzMjQ2NDc2Nn0.V5M8_Q-bZ2v8-x69V8b7b7p_v-28x_4';
 
-        let supabaseClient = null;
+        // إنشاء عميل الاتصال الموحد للمنظومة
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
         let allLogs = [];
         let filteredLogs = []; 
         let refreshInterval = null;
@@ -306,7 +304,7 @@
             } catch (e) { console.log(e); }
         }
 
-        // دالة تسجيل الدخول الآمنة كلياً والمضادة للتعليق
+        // دالة تسجيل الدخول المُصلحة بالكامل والمحمية من التعليق
         async function handleLogin(event) {
             event.preventDefault();
             const userInp = document.getElementById('login-username').value.trim();
@@ -314,18 +312,13 @@
             const errorDiv = document.getElementById('login-error');
             const btn = document.getElementById('btn-login');
 
-            // 1. قفل الزر وتغيير النص لحماية الطلب من التكرار
+            // 1. قفل الزر وتغيير النص فوراً لمنع التكرار والتعليق
             btn.disabled = true;
             btn.innerText = "...جار التحقق";
             errorDiv.classList.add('hidden');
 
             try {
-                // فك التشفير التلقائي لبيانات السيرفر
-                const u = _decodeChunk(_uChunks);
-                const k = _decodeChunk(_kChunks);
-                supabaseClient = supabase.createClient(u, k);
-
-                // 2. البحث عن المستخدم في جدول نظام المستخدمين الموحد
+                // 2. الاستعلام من جدول المستخدمين
                 const { data: userRow, error } = await supabaseClient
                     .from('system_users')
                     .select('*')
@@ -333,7 +326,7 @@
                     .eq('password', passInp)
                     .maybeSingle();
 
-                // في حال وجود خطأ برمجي صريح في جلب الجدول (مثال: الجدول غير منشأ)
+                // في حال وجود خطأ برمجي واضح من السيرفر أو السوبابيس
                 if (error) {
                     console.error("Supabase Error: ", error);
                     errorDiv.innerText = i18n[currentLang].errDb;
@@ -341,12 +334,12 @@
                     return;
                 }
 
-                // إذا كانت البيانات خاطئة أو لم يعثر على السطر
+                // إذا كانت البيانات المدخلة خاطئة ولم يجد يوزر مطابق
                 if (!userRow) {
                     errorDiv.innerText = i18n[currentLang].errLogin;
                     errorDiv.classList.remove('hidden');
                 } else {
-                    // في حال نجاح التوثيق، نقوم بإخفاء الكرت وإظهار اللوحة الحية مباشرة
+                    // في حال نجاح الدخول، نقوم بإخفاء شاشة تسجيل الدخول وبدء جلب البيانات
                     document.getElementById('login-card').classList.add('hidden');
                     document.body.className = "bg-gray-900 text-gray-100 min-h-screen p-4 md:p-8 flex flex-col justify-start";
                     document.getElementById('dashboard-content').classList.remove('hidden');
@@ -356,12 +349,11 @@
                     startTimers();
                 }
             } catch (err) {
-                // إلغاء التعليق في حالة حدوث مشاكل في الشبكة أو المتصفح
-                console.error("Network Error: ", err);
+                console.error("Network Exception: ", err);
                 errorDiv.innerText = i18n[currentLang].errDb;
                 errorDiv.classList.remove('hidden');
             } finally {
-                // 3. كود الـ finally يضمن تفعيل الزر وإعادته لحالته مهما كانت النتيجة
+                // 3. هذا البلوك يضمن حتماً إرجاع الزر لحالته الطبيعية فلا يعلق على كلمة "جاري التحقق"
                 btn.disabled = false;
                 btn.innerText = i18n[currentLang].btnLogin;
             }
