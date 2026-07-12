@@ -2,55 +2,99 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>لوحة تحكم إبداع نت</title>
+    <title>إبداع نت | لوحة التحكم الذكية</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700&display=swap');
+        body { font-family: 'Tajawal', sans-serif; background: #0a0f1c; color: #e2e8f0; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
+        .pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+    </style>
 </head>
-<body class="bg-gray-900 text-gray-100 p-8">
+<body class="min-h-screen p-4 md:p-8">
 
-    <!-- نافذة الدخول -->
-    <div id="login-container" class="max-w-md mx-auto bg-gray-800 p-8 rounded-2xl border border-gray-700">
-        <h2 class="text-2xl font-bold mb-6 text-teal-400">تسجيل الدخول</h2>
-        <input id="user" type="text" placeholder="اسم المستخدم" class="w-full bg-gray-900 p-3 mb-4 rounded border border-gray-700">
-        <input id="pass" type="password" placeholder="كلمة المرور" class="w-full bg-gray-900 p-3 mb-6 rounded border border-gray-700">
-        <button onclick="login()" class="w-full bg-teal-600 py-3 rounded font-bold hover:bg-teal-500">دخول</button>
+    <!-- شاشة تسجيل الدخول -->
+    <div id="login-screen" class="fixed inset-0 flex items-center justify-center z-50 bg-[#0a0f1c]">
+        <div class="glass p-8 rounded-3xl w-full max-w-sm text-center">
+            <div class="w-16 h-16 bg-teal-600 rounded-2xl mx-auto mb-6 flex items-center justify-center text-2xl font-bold shadow-lg shadow-teal-500/20">إبداع</div>
+            <h2 class="text-xl font-bold mb-6">دخول نظام المراقبة</h2>
+            <input id="u" type="text" placeholder="اسم المستخدم" class="w-full bg-black/30 p-3 rounded-xl mb-3 border border-white/10 outline-none focus:border-teal-500">
+            <input id="p" type="password" placeholder="كلمة المرور" class="w-full bg-black/30 p-3 rounded-xl mb-6 border border-white/10 outline-none focus:border-teal-500">
+            <button onclick="login()" class="w-full bg-teal-600 py-3 rounded-xl font-bold hover:bg-teal-500 transition">تسجيل الدخول</button>
+        </div>
     </div>
 
-    <!-- الداشبورد (يظهر بعد الدخول) -->
-    <div id="dashboard" class="hidden">
-        <h1 class="text-3xl font-bold mb-6">مرحباً بك في الداشبورد</h1>
-        <div id="logs" class="bg-gray-800 p-4 rounded-xl border border-gray-700"></div>
+    <!-- لوحة التحكم -->
+    <div id="dashboard" class="hidden max-w-7xl mx-auto">
+        <div class="flex justify-between items-end mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-white">لوحة تحكم إبداع نت</h1>
+                <p class="text-gray-400 text-sm">مراقبة لحظية لسجلات الميكروتك</p>
+            </div>
+            <button onclick="location.reload()" class="bg-white/5 px-4 py-2 rounded-lg border border-white/10 hover:bg-white/10">🔄 تحديث</button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="glass p-5 rounded-2xl border-r-4 border-emerald-500"><p class="text-[10px] text-gray-400 uppercase">متصلون اليوم</p><h2 id="stat-c" class="text-3xl font-bold">0</h2></div>
+            <div class="glass p-5 rounded-2xl border-r-4 border-amber-500"><p class="text-[10px] text-gray-400 uppercase">انقطاعات</p><h2 id="stat-d" class="text-3xl font-bold">0</h2></div>
+            <div class="glass p-5 rounded-2xl border-r-4 border-rose-500"><p class="text-[10px] text-gray-400 uppercase">مشاكل توثيق</p><h2 id="stat-e" class="text-3xl font-bold">0</h2></div>
+            <div class="glass p-5 rounded-2xl border-r-4 border-blue-500"><p class="text-[10px] text-gray-400 uppercase">حالة الشبكة</p><div class="flex items-center gap-2 mt-2"><div class="w-2 h-2 bg-emerald-500 rounded-full pulse"></div><span class="text-sm">نشط</span></div></div>
+        </div>
+
+        <div class="glass rounded-3xl overflow-hidden border border-white/5">
+            <table class="w-full text-right">
+                <thead class="bg-black/20 text-gray-400 text-[10px] uppercase">
+                    <tr><th class="p-5">الوقت</th><th class="p-5">الحالة</th><th class="p-5">المستخدم</th><th class="p-5">الرسالة</th><th class="p-5">الراوتر</th></tr>
+                </thead>
+                <tbody id="logs-tbody" class="text-sm"></tbody>
+            </table>
+        </div>
     </div>
 
     <script>
-        // 1. ضع مفاتيحك هنا في جهازك فقط ولا ترفعها على GitHub
-       const SUPABASE_URL = "https://iuokwfigwuebutctaxli.supabase.co";
-const SUPABASE_KEY = "sb_publishable_BWoVwRtLPrIXzUNqembCtA_P7To3GW-";
+        const SUPABASE_URL = "https://iuokwfigwuebutctaxli.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_BWoVwRtLPrIXzUNqembCtA_P7To3GW-";
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         async function login() {
-            const user = document.getElementById('user').value;
-            const pass = document.getElementById('pass').value;
-
-            const { data, error } = await supabase
-                .from('system_users')
-                .select('*')
-                .eq('username', user)
-                .eq('password', pass)
-                .single();
-
+            const u = document.getElementById('u').value;
+            const p = document.getElementById('p').value;
+            
+            const { data, error } = await supabase.from('system_users').select('*').eq('username', u).eq('password', p).single();
+            
             if (data) {
-                document.getElementById('login-container').classList.add('hidden');
+                document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
                 fetchLogs();
-            } else {
-                alert('خطأ في البيانات!');
+            } else { 
+                alert('اسم المستخدم أو كلمة المرور غير صحيحة'); 
             }
         }
 
         async function fetchLogs() {
-            const { data } = await supabase.from('network_logs').select('*').limit(20);
-            document.getElementById('logs').innerHTML = JSON.stringify(data);
+            const { data, error } = await supabase.from('network_logs').select('*').order('created_at', { ascending: false }).limit(50);
+            
+            if (error) {
+                console.error("خطأ:", error);
+                return;
+            }
+
+            const tbody = document.getElementById('logs-tbody');
+            document.getElementById('stat-c').innerText = data.filter(i => i.log_type === 'PPP Connect').length;
+            document.getElementById('stat-d').innerText = data.filter(i => i.log_type === 'PPP Disconnect').length;
+            document.getElementById('stat-e').innerText = data.filter(i => i.log_type === 'PPP Auth Error').length;
+            
+            tbody.innerHTML = data.map(l => `
+                <tr class="hover:bg-white/5 transition border-b border-white/5">
+                    <td class="p-4 text-gray-400">${new Date(l.created_at).toLocaleTimeString()}</td>
+                    <td class="p-4"><span class="px-2 py-1 rounded-md text-[10px] bg-white/5">${l.log_type}</span></td>
+                    <td class="p-4 font-bold">${l.username}</td>
+                    <td class="p-4 text-gray-300 text-xs">${l.message}</td>
+                    <td class="p-4 font-mono text-gray-500 text-xs">${l.router_ip}</td>
+                </tr>
+            `).join('');
         }
     </script>
 </body>
