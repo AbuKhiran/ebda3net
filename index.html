@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم شبكة ابداع نت</title>
+    <!-- Tailwind CSS للتصميم الاحترافي والسريع -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- مكتبة Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
+        body { font-family: 'Cairo', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen p-4 md:p-8">
+
+    <!-- إعدادات الاتصال بـ Supabase (تظهر لأول مرة فقط لحماية مفاتيحك) -->
+    <div id="setup-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+        <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 w-full max-w-md shadow-2xl">
+            <h3 class="text-xl font-bold text-teal-400 mb-4">الاتصال بقاعدة البيانات لشبكة ابداع نت</h3>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Supabase URL</label>
+                    <input id="db-url" type="text" class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm focus:outline-none focus:border-teal-500">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Supabase Anon KEY</label>
+                    <input id="db-key" type="password" class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm focus:outline-none focus:border-teal-500">
+                </div>
+                <button onclick="saveSettings()" class="w-full bg-teal-600 hover:bg-teal-500 text-white font-bold py-2 rounded transition">حفظ والاتصال</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ترويسة الموقع الرئيسية -->
+    <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 border-b border-gray-800 pb-4">
+        <div class="flex items-center gap-3">
+            <div class="bg-teal-600 text-white p-3 rounded-xl font-bold text-xl shadow-lg shadow-teal-600/30">إبداع</div>
+            <div>
+                <h1 class="text-2xl font-bold tracking-wide">شبكة ابداع نت</h1>
+                <p class="text-xs text-gray-400">منظومة مراقبة وتحليل سجلات الميكروتك لنظام PPP</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="refreshData()" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2 cursor-pointer">
+                🔄 تحديث البيانات
+            </button>
+            <button onclick="clearSettings()" class="text-xs text-red-400 hover:underline cursor-pointer">تغيير إعدادات الربط</button>
+        </div>
+    </header>
+
+    <!-- قسم الإحصائيات (التحليلات الذكية لليوم) -->
+    <section class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <!-- 1. عدد المتصلين اليوم -->
+        <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md">
+            <div class="text-gray-400 text-sm font-medium">عدد المتصلين (اليوم)</div>
+            <div id="stat-connects" class="text-3xl font-bold text-emerald-400 mt-2">0</div>
+            <div class="text-[10px] text-emerald-500/80 mt-1">✓ جلسات اتصال PPP ناجحة</div>
+        </div>
+
+        <!-- 2. عدد المفصولين اليوم -->
+        <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md">
+            <div class="text-gray-400 text-sm font-medium">عدد قطع الاتصال (اليوم)</div>
+            <div id="stat-disconnects" class="text-3xl font-bold text-amber-400 mt-2">0</div>
+            <div class="text-[10px] text-amber-500/80 mt-1">⚠ عمليات خروج أو فقدان إشارة</div>
+        </div>
+
+        <!-- 3. أكثر يوزر فصل اليوم -->
+        <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md">
+            <div class="text-gray-400 text-sm font-medium">الأكثر فصلاً (اليوم)</div>
+            <div id="stat-top-disconnect" class="text-xl font-bold text-red-400 mt-2 truncate">---</div>
+            <div id="stat-top-disconnect-count" class="text-[10px] text-red-500/80 mt-1">عدد المرات: 0</div>
+        </div>
+
+        <!-- 4. إجمالي المشاكل والأخطاء اليوم -->
+        <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md">
+            <div class="text-gray-400 text-sm font-medium">مشاكل النظام والأخطاء (اليوم)</div>
+            <div id="stat-errors" class="text-3xl font-bold text-rose-500 mt-2">0</div>
+            <div class="text-[10px] text-rose-400/80 mt-1">⛔ أخطاء توثيق أو مشاكل كوابل</div>
+        </div>
+    </section>
+
+    <!-- الفلاتر الذكية والبحث المتقدم -->
+    <section class="bg-gray-800 p-4 rounded-2xl border border-gray-700/50 mb-6 grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+        <div>
+            <label class="block text-xs text-gray-400 mb-1">بحث باسم المستخدم (User)</label>
+            <input id="filter-user" type="text" oninput="applyFilters()" placeholder="اكتب اسم اليوزر..." class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-teal-500">
+        </div>
+        <div>
+            <label class="block text-xs text-gray-400 mb-1">فلترة حسب نوع السجل (Log Type)</label>
+            <select id="filter-type" onchange="applyFilters()" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-teal-500">
+                <option value="">كل الأنواع</option>
+                <option value="PPP Connect">PPP Connect (اتصال)</option>
+                <option value="PPP Disconnect">PPP Disconnect (فصل)</option>
+                <option value="PPP Auth Error">PPP Auth Error (خطأ باسورد)</option>
+                <option value="System Error">System Error (أخطاء نظام)</option>
+                <option value="General Info">General Info (معلومات عامة)</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs text-gray-400 mb-1">التاريخ</label>
+            <select id="filter-date" onchange="applyFilters()" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-teal-500">
+                <option value="today">اليوم فقط</option>
+                <option value="all">كل الأوقات السابقة</option>
+            </select>
+        </div>
+        <div class="text-left text-xs text-gray-400">
+            إجمالي السجلات المعروضة: <span id="log-count" class="font-bold text-teal-400">0</span>
+        </div>
+    </section>
+
+    <!-- جدول البيانات الرئيسي المنظم -->
+    <main class="bg-gray-800 rounded-2xl border border-gray-700/50 overflow-hidden shadow-xl">
+        <div class="overflow-x-auto">
+            <table class="w-full text-right border-collapse">
+                <thead>
+                    <tr class="bg-gray-950/60 border-b border-gray-700 text-xs text-gray-400 font-semibold">
+                        <th class="p-4">الوقت والتاريخ</th>
+                        <th class="p-4">نوع السجل</th>
+                        <th class="p-4">المستخدم (User)</th>
+                        <th class="p-4">نص الرسالة والخطأ من الميكروتك</th>
+                        <th class="p-4">IP الراوتر</th>
+                    </tr>
+                </thead>
+                <tbody id="logs-tbody" class="text-sm divide-y divide-gray-700/40">
+                    <!-- سيتم حقن البيانات هنا بواسطة جافاسكربت -->
+                    <tr>
+                        <td colspan="5" class="p-8 text-center text-gray-500">جاري تحميل البيانات من Supabase...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- جافاسكربت للربط، الفلترة الذكية، والتحليل -->
+    <script>
+        let supabaseClient = null;
+        let allLogs = [];
+
+        // التحقق من الإعدادات المحفوظة عند فتح الصفحة
+        window.onload = function() {
+            const savedUrl = localStorage.getItem('sb_url');
+            const savedKey = localStorage.getItem('sb_key');
+
+            if (savedUrl && savedKey) {
+                initSupabase(savedUrl, savedKey);
+            } else {
+                document.getElementById('setup-modal').classList.remove('hidden');
+            }
+        };
+
+        function saveSettings() {
+            const url = document.getElementById('db-url').value.trim();
+            const key = document.getElementById('db-key').value.trim();
+
+            if (url && key) {
+                localStorage.setItem('sb_url', url);
+                localStorage.setItem('sb_key', key);
+                document.getElementById('setup-modal').classList.add('hidden');
+                initSupabase(url, key);
+            } else {
+                alert('الرجاء إدخال الحقول المطلوبة بشكل صحيح.');
+            }
+        }
+
+        function clearSettings() {
+            localStorage.clear();
+            location.reload();
+        }
+
+        function initSupabase(url, key) {
+            supabaseClient = supabase.createClient(url, key);
+            refreshData();
+        }
+
+        // جلب البيانات من Supabase وتطبيق التحليلات المطلوبة منك
+        async function refreshData() {
+            if (!supabaseClient) return;
+            
+            // جلب آخر 1000 سجل لضمان سرعة الصفحة وكفاءة التحليل
+            const { data, error } = await supabaseClient
+                .from('network_logs')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(1000);
+
+            if (error) {
+                alert('خطأ أثناء جلب البيانات: ' + error.message);
+                return;
+            }
+
+            allLogs = data || [];
+            calculateAnalytics();
+            applyFilters();
+        }
+
+        // 1. حساب الإحصائيات الأربعة المطلوبة
+        function calculateAnalytics() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            
+            // فلترة سجلات اليوم فقط للحسابات الإحصائية
+            const todayLogs = allLogs.filter(log => log.created_at.startsWith(todayStr));
+
+            // أ. عدد المتصلين اليوم
+            const connectsToday = todayLogs.filter(log => log.log_type === 'PPP Connect').length;
+            document.getElementById('stat-connects').innerText = connectsToday;
+
+            // ب. عدد المفصولين اليوم
+            const disconnectsToday = todayLogs.filter(log => log.log_type === 'PPP Disconnect').length;
+            document.getElementById('stat-disconnects').innerText = disconnectsToday;
+
+            // ج. حساب أكثر مستخدم فصل اليوم
+            const disconnectCounts = {};
+            todayLogs.filter(log => log.log_type === 'PPP Disconnect' && log.username).forEach(log => {
+                disconnectCounts[log.username] = (disconnectCounts[log.username] || 0) + 1;
+            });
+
+            let topUser = "---";
+            let topCount = 0;
+            for (const user in disconnectCounts) {
+                if (disconnectCounts[user] > topCount) {
+                    topCount = disconnectCounts[user];
+                    topUser = user;
+                }
+            }
+            document.getElementById('stat-top-disconnect').innerText = topUser;
+            document.getElementById('stat-top-disconnect-count').innerText = `عدد المرات: ${topCount}`;
+
+            // د. إجمالي الأخطاء والمشاكل اليوم (System Errors + PPP Auth Errors)
+            const errorsToday = todayLogs.filter(log => log.log_type === 'System Error' || log.log_type === 'PPP Auth Error').length;
+            document.getElementById('stat-errors').innerText = errorsToday;
+        }
+
+        // 2. تطبيق نظام الفلترة وعرض الجدول والترتيب من الأهم للأقل أهمية
+        function applyFilters() {
+            const userQuery = document.getElementById('filter-user').value.toLowerCase().trim();
+            const typeQuery = document.getElementById('filter-type').value;
+            const dateQuery = document.getElementById('filter-date').value;
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            let filtered = [...allLogs];
+
+            // فلترة التاريخ
+            if (dateQuery === 'today') {
+                filtered = filtered.filter(log => log.created_at.startsWith(todayStr));
+            }
+
+            // فلترة نوع اللوج
+            if (typeQuery) {
+                filtered = filtered.filter(log => log.log_type === typeQuery);
+            }
+
+            // فلترة اسم اليوزر
+            if (userQuery) {
+                filtered = filtered.filter(log => log.username && log.username.toLowerCase().includes(userQuery));
+            }
+
+            // ترتيب المشاكل من الأهم للأقل أهمية (System Error ثم Auth Error ثم Disconnect ثم البقية)
+            const typePriority = {
+                'System Error': 1,
+                'PPP Auth Error': 2,
+                'PPP Disconnect': 3,
+                'PPP Connect': 4,
+                'PPP Info': 5,
+                'General Info': 6
+            };
+
+            filtered.sort((a, b) => {
+                const pA = typePriority[a.log_type] || 99;
+                const pB = typePriority[b.log_type] || 99;
+                if (pA !== pB) return pA - pB; // الأولوية للنوع الأهم
+                return new Date(b.created_at) - new Date(a.created_at); // ثم الأحدث تاريخاً
+            });
+
+            document.getElementById('log-count').innerText = filtered.length;
+            renderTable(filtered);
+        }
+
+        // رندرة الجدول داخل الصفحة مع إضافة الألوان المتناسقة لكل نوع خطأ
+        function renderTable(data) {
+            const tbody = document.getElementById('logs-tbody');
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-500">لا توجد بيانات تطابق الفلاتر المحددة.</td></tr>`;
+                return;
+            }
+
+            const typeBadges = {
+                'PPP Connect': '<span class="px-2 py-1 text-xs font-semibold rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">اتصال</span>',
+                'PPP Disconnect': '<span class="px-2 py-1 text-xs font-semibold rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">انفصال</span>',
+                'PPP Auth Error': '<span class="px-2 py-1 text-xs font-semibold rounded bg-red-500/10 text-red-400 border border-red-500/20">خطأ باسورد</span>',
+                'System Error': '<span class="px-2 py-1 text-xs font-semibold rounded bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold animate-pulse">⛔ خطأ سيرفر</span>',
+                'PPP Info': '<span class="px-2 py-1 text-xs font-semibold rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">إشعار PPP</span>',
+                'General Info': '<span class="px-2 py-1 text-xs font-semibold rounded bg-gray-700 text-gray-300">عام</span>'
+            };
+
+            tbody.innerHTML = data.map(log => {
+                const formattedDate = new Date(log.created_at).toLocaleString('ar-EG', { hour12: true });
+                return `
+                    <tr class="hover:bg-gray-700/30 transition border-b border-gray-800/50">
+                        <td class="p-4 whitespace-nowrap text-xs text-gray-400">${formattedDate}</td>
+                        <td class="p-4 whitespace-nowrap">${typeBadges[log.log_type] || log.log_type}</td>
+                        <td class="p-4 font-semibold text-gray-200">${log.username || '<span class="text-gray-600">-</span>'}</td>
+                        <td class="p-4 text-xs text-gray-300 font-mono select-all max-w-xs md:max-w-xl truncate" title="${log.message}">${log.message}</td>
+                        <td class="p-4 whitespace-nowrap text-xs font-mono text-gray-400">${log.router_ip}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>
