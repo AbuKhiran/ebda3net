@@ -1,241 +1,57 @@
-<input id="login-password" type="password" required placeholder="••••••••" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-sm text-gray-200 focus:outline-none focus:border-teal-500 font-mono">
-</div>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>لوحة تحكم إبداع نت</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 p-8">
 
-            <!-- رسالة الخطأ في حال كانت البيانات غلط -->
-<div id="login-error" class="text-xs text-rose-400 font-semibold hidden bg-rose-500/10 p-2.5 rounded-lg border border-rose-500/20 text-center">
-❌ اسم المستخدم أو كلمة المرور غير صحيحة!
-</div>
-@@ -44,7 +43,7 @@ <h2 class="text-xl font-bold text-gray-100">تسجيل دخول الإدارة</
-</form>
-</div>
+    <!-- نافذة الدخول -->
+    <div id="login-container" class="max-w-md mx-auto bg-gray-800 p-8 rounded-2xl border border-gray-700">
+        <h2 class="text-2xl font-bold mb-6 text-teal-400">تسجيل الدخول</h2>
+        <input id="user" type="text" placeholder="اسم المستخدم" class="w-full bg-gray-900 p-3 mb-4 rounded border border-gray-700">
+        <input id="pass" type="password" placeholder="كلمة المرور" class="w-full bg-gray-900 p-3 mb-6 rounded border border-gray-700">
+        <button onclick="login()" class="w-full bg-teal-600 py-3 rounded font-bold hover:bg-teal-500">دخول</button>
+    </div>
 
-    <!-- 2. لوحة التحكم الرئيسية (مخفية افتراضياً وتحتاج صلاحية للظهور) -->
-    <!-- 2. لوحة التحكم الرئيسية (تظهر بعد الصلاحية) -->
-<div id="dashboard-content" class="w-full max-w-7xl mx-auto hidden transition-all duration-500">
-<!-- ترويسة الموقع الرئيسية -->
-<header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 border-b border-gray-800 pb-4">
-@@ -55,9 +54,13 @@ <h1 class="text-2xl font-bold tracking-wide">شبكة ابداع نت</h1>
-<p class="text-xs text-gray-400">منظومة مراقبة وتحليل سجلات الميكروتك لنظام PPP</p>
-</div>
-</div>
-            <div class="flex items-center gap-2">
-                <button onclick="refreshData()" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2 cursor-pointer">
-                    🔄 تحديث البيانات
-            <div class="flex items-center gap-3">
-                <!-- مؤشر التحديث التلقائي الذكي - تم تعديله لدقيقة -->
-                <div class="text-xs bg-gray-950 px-3 py-2 rounded-lg border border-gray-800/80 text-gray-400 font-mono">
-                    التحديث القادم خلال: <span id="countdown-timer" class="text-teal-400 font-bold">01:00</span>
-                </div>
-                <button onclick="manualRefresh()" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2 cursor-pointer">
-                    🔄 تحديث الآن
-</button>
-<button onclick="handleLogout()" class="bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/50 px-4 py-2 rounded-lg text-sm font-semibold text-rose-400 transition cursor-pointer">
-تسجيل الخروج 🚪
-@@ -92,7 +95,7 @@ <h1 class="text-2xl font-bold tracking-wide">شبكة ابداع نت</h1>
-</div>
-</section>
+    <!-- الداشبورد (يظهر بعد الدخول) -->
+    <div id="dashboard" class="hidden">
+        <h1 class="text-3xl font-bold mb-6">مرحباً بك في الداشبورد</h1>
+        <div id="logs" class="bg-gray-800 p-4 rounded-xl border border-gray-700"></div>
+    </div>
 
-        <!-- الفلاتر الذكية والبحث المتقدم -->
-        <!-- الفلاتر الذكية والبحث -->
-<section class="bg-gray-800 p-4 rounded-2xl border border-gray-700/50 mb-6 grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
-<div>
-<label class="block text-xs text-gray-400 mb-1">بحث باسم المستخدم (User)</label>
-@@ -122,7 +125,7 @@ <h1 class="text-2xl font-bold tracking-wide">شبكة ابداع نت</h1>
-</div>
-</section>
-
-        <!-- جدول البيانات الرئيسي المنظم -->
-        <!-- الجدول الرئيسي -->
-<main class="bg-gray-800 rounded-2xl border border-gray-700/50 overflow-hidden shadow-xl">
-<div class="overflow-x-auto">
-<table class="w-full text-right border-collapse">
-@@ -146,44 +149,103 @@ <h1 class="text-2xl font-bold tracking-wide">شبكة ابداع نت</h1>
-</div>
-
-<script>
-        // إعدادات ربط قاعدة البيانات الخاصة بك مباشرة
-const SUPABASE_URL = "https://iuokwfigwuebutctaxli.supabase.co";
+    <script>
+        // 1. ضع مفاتيحك هنا في جهازك فقط ولا ترفعها على GitHub
+       const SUPABASE_URL = "https://iuokwfigwuebutctaxli.supabase.co";
 const SUPABASE_KEY = "sb_publishable_BWoVwRtLPrIXzUNqembCtA_P7To3GW-";
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let supabaseClient = null;
-let allLogs = [];
-        let refreshInterval = null;
-        let countdownInterval = null;
-        let timeLeft = 60; // تم التعديل إلى دقيقة واحدة (60 ثانية)
-        let lastCheckedId = null; // لمتابعة آخر سجل تم فحصه لمنع تكرار الصوت لنفس الخطأ القديم
+        async function login() {
+            const user = document.getElementById('user').value;
+            const pass = document.getElementById('pass').value;
 
-        // دالة لتوليد صوت تنبيه هرتز نقي بدون الحاجة لملفات خارجية
-        function playAlertSound() {
-            try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                
-                // النغمة الأولى العالية
-                const oscillator1 = audioCtx.createOscillator();
-                const gainNode1 = audioCtx.createGain();
-                oscillator1.type = 'sine';
-                oscillator1.frequency.setValueAtTime(880, audioCtx.currentTime); // نغمة مرتفعة وحادة
-                gainNode1.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                oscillator1.connect(gainNode1);
-                gainNode1.connect(audioCtx.destination);
-                oscillator1.start();
-                oscillator1.stop(audioCtx.currentTime + 0.15);
+            const { data, error } = await supabase
+                .from('system_users')
+                .select('*')
+                .eq('username', user)
+                .eq('password', pass)
+                .single();
 
-                // النغمة الثانية بعد فترة قصيرة جداً لعمل تأثير إنذار ثنائي
-                setTimeout(() => {
-                    const oscillator2 = audioCtx.createOscillator();
-                    const gainNode2 = audioCtx.createGain();
-                    oscillator2.type = 'sine';
-                    oscillator2.frequency.setValueAtTime(660, audioCtx.currentTime);
-                    gainNode2.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                    oscillator2.connect(gainNode2);
-                    gainNode2.connect(audioCtx.destination);
-                    oscillator2.start();
-                    oscillator2.stop(audioCtx.currentTime + 0.25);
-                }, 150);
-
-            } catch (e) {
-                console.log("فشل تشغيل الصوت بسبب قيود المتصفح: ", e);
+            if (data) {
+                document.getElementById('login-container').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                fetchLogs();
+            } else {
+                alert('خطأ في البيانات!');
             }
         }
 
-        // دالة التعامل مع تسجيل الدخول
-function handleLogin(event) {
-event.preventDefault();
-const userInp = document.getElementById('login-username').value.trim();
-const passInp = document.getElementById('login-password').value.trim();
-const errorDiv = document.getElementById('login-error');
-
-if (userInp === "admin" && passInp === "m@a@2013") {
-                // إخفاء كارد اللوجن وتغيير ستايل الـ body لعرض الداشبورد الكاملة
-document.getElementById('login-card').classList.add('hidden');
-document.body.className = "bg-gray-900 text-gray-100 min-h-screen p-4 md:p-8 flex flex-col justify-start";
-document.getElementById('dashboard-content').classList.remove('hidden');
-
-                // بدء ربط السيرفر وجلب الداتا بعد نجاح الدخول مباشرة
-supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                refreshData();
-                
-                refreshData(true); // تمرير true للإشارة إلى أنه التحميل الأول ولا نريد إطلاق إنذار للأخطاء القديمة جداً
-                startTimers();
-} else {
-errorDiv.classList.remove('hidden');
-}
-}
-
-        // دالة تسجيل الخروج لإعادة قفل النظام كاملاً
-function handleLogout() {
-            location.reload(); // إعادة تحميل الصفحة لإلغاء أي داتا مخزنة في الميموري فوراً وضمان الأمان
-            location.reload();
-}
-
-        // جلب البيانات من Supabase
-        async function refreshData() {
-        function startTimers() {
-            clearInterval(refreshInterval);
-            clearInterval(countdownInterval);
-            timeLeft = 60; // 60 ثانية
-
-            // مؤقت الجلب الفعلي كل دقيقة
-            refreshInterval = setInterval(() => {
-                refreshData(false);
-                timeLeft = 60; 
-            }, 60000);
-
-            // مؤقت الشاشة للعداد التنازلي ثانية بثانية
-            countdownInterval = setInterval(() => {
-                timeLeft--;
-                if (timeLeft < 0) timeLeft = 60;
-                
-                const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-                const seconds = (timeLeft % 60).toString().padStart(2, '0');
-                document.getElementById('countdown-timer').innerText = `${minutes}:${seconds}`;
-            }, 1000);
+        async function fetchLogs() {
+            const { data } = await supabase.from('network_logs').select('*').limit(20);
+            document.getElementById('logs').innerHTML = JSON.stringify(data);
         }
-
-        function manualRefresh() {
-            refreshData(false);
-            startTimers(); 
-        }
-
-        async function refreshData(isFirstLoad = false) {
-if (!supabaseClient) return;
-            const tbody = document.getElementById('logs-tbody');
-            tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-400 animate-pulse">جاري تحديث البيانات وجلب سجلات الميكروتك الحالية...</td></tr>`;
-
-try {
-const { data, error } = await supabaseClient
-@@ -193,20 +255,39 @@ <h1 class="text-2xl font-bold tracking-wide">شبكة ابداع نت</h1>
-.limit(1000);
-
-if (error) {
-                    tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-rose-400 font-semibold">خطأ من السيرفر: ${error.message} <br> <span class="text-xs text-gray-400">تأكد من إيقاف نظام حماية الـ RLS على جدول network_logs في السيرفر لتمرير البيانات.</span></td></tr>`;
-                    console.error("خطأ سيرفر: ", error.message);
-return;
-}
-
-allLogs = data || [];
-                
-                // نظام فحص السجلات الجديدة وإطلاق الإنذار الصوتي للأخطاء الحرجة
-                if (allLogs.length > 0) {
-                    const latestLog = allLogs[0];
-                    
-                    // إذا لم يكن هذا التحميل الأول، وهناك سجل جديد تماماً لم نقم بفحصه بعد
-                    if (!isFirstLoad && lastCheckedId && latestLog.id !== lastCheckedId) {
-                        // فلترة السجلات التي وصلت في التحديث الحالي فقط
-                        const newLogs = allLogs.filter(log => log.id > lastCheckedId || (typeof log.id === 'string' && log.created_at > allLogs.find(l => l.id === lastCheckedId)?.created_at));
-                        
-                        // فحص إذا كان أي من السجلات الجديدة يحتوي على خطأ حرج
-                        const hasCriticalError = newLogs.some(log => log.log_type === 'System Error' || log.log_type === 'Link Down');
-                        if (hasCriticalError) {
-                            playAlertSound();
-                        }
-                    }
-                    // تحديث معرف آخر سجل تم التحقق منه
-                    lastCheckedId = latestLog.id;
-                }
-
-calculateAnalytics();
-applyFilters();
-
-} catch (err) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-rose-400 font-semibold">فشل اتصال الشبكة بالخادم: ${err.message}</td></tr>`;
-                console.error("فشل اتصال الشبكة: ", err.message);
-}
-}
-
-        // حساب الإحصائيات لليوم الحالي
-function calculateAnalytics() {
-const todayStr = new Date().toISOString().split('T')[0];
-const todayLogs = allLogs.filter(log => log.created_at && log.created_at.startsWith(todayStr));
-@@ -237,7 +318,6 @@ <h1 class="text-2xl font-bold tracking-wide">شبكة ابداع نت</h1>
-document.getElementById('stat-errors').innerText = errorsToday;
-}
-
-        // فلترة وعرض السجلات
-function applyFilters() {
-const userQuery = document.getElementById('filter-user').value.toLowerCase().trim();
-const typeQuery = document.getElementById('filter-type').value;
-@@ -258,7 +338,6 @@ <h1 class="text-2xl font-bold tracking-wide">شبكة ابداع نت</h1>
-filtered = filtered.filter(log => log.username && log.username.toLowerCase().includes(userQuery));
-}
-
-            // ترتيب أولويات الأخطاء الحرجة لتظهر أولاً في المراقبة
-const typePriority = {
-'System Error': 1,
-'Link Down': 2,
-@@ -279,15 +358,13 @@ <h1 class="text-2xl font-bold tracking-wide">شبكة ابداع نت</h1>
-renderTable(filtered);
-}
-
-        // بناء وعرض جدول السجلات بناءً على نظام لوج الميكروتك الشامل
-function renderTable(data) {
-const tbody = document.getElementById('logs-tbody');
-if (data.length === 0) {
-tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-500">لا توجد سجلات تطابق فلاتر المراقبة حالياً.</td></tr>`;
-return;
-}
-
-            // خريطة تصنيف وتلوين أخطاء الميكروتك الذكية
-const typeBadges = {
-'PPP Connect': '<span class="px-2 py-1 text-xs font-semibold rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">اتصال ناجح</span>',
-'PPP Disconnect': '<span class="px-2 py-1 text-xs font-semibold rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">قطع اتصال</span>',
+    </script>
+</body>
+</html>
