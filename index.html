@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" id="html-root">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,25 +19,25 @@
     <div id="login-card" class="bg-gray-800 p-8 rounded-2xl border border-gray-700/60 shadow-2xl w-full max-w-md transition-all duration-300">
         <div class="text-center mb-6">
             <div class="inline-block bg-teal-600 text-white px-4 py-2 rounded-xl font-bold text-xl mb-3 shadow-lg shadow-teal-600/20">إبداع</div>
-            <h2 class="text-xl font-bold text-gray-100">تسجيل دخول الإدارة</h2>
-            <p class="text-xs text-gray-400 mt-1">يرجى إدخال البيانات للوصول إلى سجلات الميكروتك</p>
+            <h2 id="login-title" class="text-xl font-bold text-gray-100">تسجيل دخول الإدارة</h2>
+            <p id="login-subtitle" class="text-xs text-gray-400 mt-1">يرجى إدخال البيانات للوصول إلى سجلات الميكروتك</p>
         </div>
 
         <form onsubmit="handleLogin(event)" class="space-y-4">
             <div>
-                <label class="block text-xs text-gray-400 mb-1">اسم المستخدم</label>
-                <input id="login-username" type="text" required placeholder="admin" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-sm text-gray-200 focus:outline-none focus:border-teal-500 font-mono">
+                <label id="lbl-username" class="block text-xs text-gray-400 mb-1">اسم المستخدم</label>
+                <input id="login-username" type="text" required placeholder="admin" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-sm text-gray-200 focus:outline-none focus:border-teal-500 font-mono text-left">
             </div>
             <div>
-                <label class="block text-xs text-gray-400 mb-1">كلمة المرور</label>
-                <input id="login-password" type="password" required placeholder="••••••••" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-sm text-gray-200 focus:outline-none focus:border-teal-500 font-mono">
+                <label id="lbl-password" class="block text-xs text-gray-400 mb-1">كلمة المرور</label>
+                <input id="login-password" type="password" required placeholder="••••••••" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-sm text-gray-200 focus:outline-none focus:border-teal-500 font-mono text-left">
             </div>
             
             <div id="login-error" class="text-xs text-rose-400 font-semibold hidden bg-rose-500/10 p-2.5 rounded-lg border border-rose-500/20 text-center">
                 ❌ اسم المستخدم أو كلمة المرور غير صحيحة!
             </div>
 
-            <button type="submit" class="w-full bg-teal-600 hover:bg-teal-500 text-white p-2.5 rounded-lg text-sm font-semibold transition cursor-pointer shadow-lg shadow-teal-600/20">
+            <button id="btn-login" type="submit" class="w-full bg-teal-600 hover:bg-teal-500 text-white p-2.5 rounded-lg text-sm font-semibold transition cursor-pointer shadow-lg shadow-teal-600/20">
                 دخول النظام 🔐
             </button>
         </form>
@@ -46,23 +46,33 @@
     <!-- 2. لوحة التحكم الرئيسية (تظهر بعد الصلاحية) -->
     <div id="dashboard-content" class="w-full max-w-7xl mx-auto hidden transition-all duration-500">
         <!-- ترويسة الموقع الرئيسية -->
-        <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 border-b border-gray-800 pb-4">
+        <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 border-b border-gray-800 pb-4">
             <div class="flex items-center gap-3">
                 <div class="bg-teal-600 text-white p-3 rounded-xl font-bold text-xl shadow-lg shadow-teal-600/30">إبداع</div>
                 <div>
-                    <h1 class="text-2xl font-bold tracking-wide">شبكة ابداع نت</h1>
-                    <p class="text-xs text-gray-400">منظومة مراقبة وتحليل سجلات الميكروتك لنظام PPP</p>
+                    <h1 id="main-title" class="text-2xl font-bold tracking-wide">شبكة ابداع نت</h1>
+                    <p id="main-subtitle" class="text-xs text-gray-400">منظومة مراقبة وتحليل سجلات الميكروتك لنظام PPP</p>
                 </div>
             </div>
-            <div class="flex items-center gap-3">
-                <!-- مؤشر التحديث التلقائي الذكي - تم تعديله لدقيقة -->
-                <div class="text-xs bg-gray-950 px-3 py-2 rounded-lg border border-gray-800/80 text-gray-400 font-mono">
-                    التحديث القادم خلال: <span id="countdown-timer" class="text-teal-400 font-bold">01:00</span>
+            
+            <!-- أزرار التحكم واللغة والتوقيت -->
+            <div class="flex flex-wrap items-center gap-3 justify-center">
+                <!-- وقت آخر تحديث الذكي -->
+                <div class="text-xs bg-gray-950/80 px-3 py-2 rounded-lg border border-gray-800 text-gray-400 font-mono text-center">
+                    <span id="lbl-last-update">آخر تحديث:</span> <span id="last-update-time" class="text-amber-400 font-bold">--:--:--</span>
                 </div>
-                <button onclick="manualRefresh()" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2 cursor-pointer">
+                <div class="text-xs bg-gray-950/80 px-3 py-2 rounded-lg border border-gray-800 text-gray-400 font-mono text-center">
+                    <span id="lbl-next-update">التحديث القادم:</span> <span id="countdown-timer" class="text-teal-400 font-bold">01:00</span>
+                </div>
+                
+                <!-- زر تبديل اللغة -->
+                <button onclick="toggleLanguage()" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 px-3 py-2 rounded-lg text-xs font-semibold text-teal-400 transition cursor-pointer">
+                    🌐 English
+                </button>
+                <button id="btn-refresh" onclick="manualRefresh()" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2 cursor-pointer">
                     🔄 تحديث الآن
                 </button>
-                <button onclick="handleLogout()" class="bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/50 px-4 py-2 rounded-lg text-sm font-semibold text-rose-400 transition cursor-pointer">
+                <button id="btn-logout" onclick="handleLogout()" class="bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/50 px-4 py-2 rounded-lg text-sm font-semibold text-rose-400 transition cursor-pointer">
                     تسجيل الخروج 🚪
                 </button>
             </div>
@@ -71,56 +81,50 @@
         <!-- قسم الإحصائيات الحية لليوم -->
         <section class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
             <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md">
-                <div class="text-gray-400 text-sm font-medium">عدد المتصلين (اليوم)</div>
+                <div id="stat-lbl-connects" class="text-gray-400 text-sm font-medium">عدد المتصلين (اليوم)</div>
                 <div id="stat-connects" class="text-3xl font-bold text-emerald-400 mt-2">0</div>
-                <div class="text-[10px] text-emerald-500/80 mt-1">✓ جلسات اتصال PPP ناجحة</div>
+                <div id="stat-sub-connects" class="text-[10px] text-emerald-500/80 mt-1">✓ جلسات اتصال PPP ناجحة</div>
             </div>
 
             <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md">
-                <div class="text-gray-400 text-sm font-medium">عدد قطع الاتصال (اليوم)</div>
+                <div id="stat-lbl-disconnects" class="text-gray-400 text-sm font-medium">عدد قطع الاتصال (اليوم)</div>
                 <div id="stat-disconnects" class="text-3xl font-bold text-amber-400 mt-2">0</div>
-                <div class="text-[10px] text-amber-500/80 mt-1">⚠ عمليات خروج أو فقدان إشارة</div>
+                <div id="stat-sub-disconnects" class="text-[10px] text-amber-500/80 mt-1">⚠ عمليات خروج أو فقدان إشارة</div>
             </div>
 
             <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md">
-                <div class="text-gray-400 text-sm font-medium">الأكثر فصلاً (اليوم)</div>
+                <div id="stat-lbl-top" class="text-gray-400 text-sm font-medium">الأكثر فصلاً (اليوم)</div>
                 <div id="stat-top-disconnect" class="text-xl font-bold text-red-400 mt-2 truncate">---</div>
                 <div id="stat-top-disconnect-count" class="text-[10px] text-red-500/80 mt-1">عدد المرات: 0</div>
             </div>
 
             <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md">
-                <div class="text-gray-400 text-sm font-medium">مشاكل النظام والأخطاء (اليوم)</div>
+                <div id="stat-lbl-errors" class="text-gray-400 text-sm font-medium">مشاكل النظام والأخطاء (اليوم)</div>
                 <div id="stat-errors" class="text-3xl font-bold text-rose-500 mt-2">0</div>
-                <div class="text-[10px] text-rose-400/80 mt-1">⛔ أخطاء توثيق أو مشاكل كوابل</div>
+                <div id="stat-sub-errors" class="text-[10px] text-rose-400/80 mt-1">⛔ أخطاء توثيق أو مشاكل كوابل</div>
             </div>
         </section>
 
-        <!-- الفلاتر الذكية والبحث -->
+        <!-- الفلاتر الذكية والبحث المتقدم -->
         <section class="bg-gray-800 p-4 rounded-2xl border border-gray-700/50 mb-6 grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
             <div>
-                <label class="block text-xs text-gray-400 mb-1">بحث باسم المستخدم (User)</label>
+                <label id="lbl-filter-user" class="block text-xs text-gray-400 mb-1">بحث باسم المستخدم (User)</label>
                 <input id="filter-user" type="text" oninput="applyFilters()" placeholder="اكتب اسم اليوزر..." class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-teal-500">
             </div>
             <div>
-                <label class="block text-xs text-gray-400 mb-1">نوع السجل (Log Type)</label>
+                <label id="lbl-filter-type" class="block text-xs text-gray-400 mb-1">نوع السجل (الموجود بالداتا بيس فقط)</label>
                 <select id="filter-type" onchange="applyFilters()" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-teal-500">
-                    <option value="">كل الأنواع والأخطاء</option>
-                    <option value="PPP Connect">PPP Connect (اتصال ناجح)</option>
-                    <option value="PPP Disconnect">PPP Disconnect (قطع اتصال)</option>
-                    <option value="PPP Auth Error">PPP Auth Error (باسورد خطأ / منتهي)</option>
-                    <option value="Link Down">Link Down (مشكلة كابل / إشارة)</option>
-                    <option value="System Error">System Error (أخطاء السيرفر والنظام)</option>
-                    <option value="General Info">General Info (معلومات عامة)</option>
+                    <option id="opt-all-types" value="">كل الأنواع المتوفرة</option>
                 </select>
             </div>
             <div>
-                <label class="block text-xs text-gray-400 mb-1">التاريخ</label>
+                <label id="lbl-filter-date" class="block text-xs text-gray-400 mb-1">التاريخ</label>
                 <select id="filter-date" onchange="applyFilters()" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-teal-500">
-                    <option value="today">اليوم فقط</option>
-                    <option value="all">كل الأوقات السابقة</option>
+                    <option id="opt-today" value="today">اليوم فقط</option>
+                    <option id="opt-all" value="all">كل الأوقات السابقة</option>
                 </select>
             </div>
-            <div class="text-left text-xs text-gray-400 pb-2">
+            <div id="lbl-total-displayed" class="text-xs text-gray-400 pb-2">
                 إجمالي السجلات المعروضة: <span id="log-count" class="font-bold text-teal-400">0</span>
             </div>
         </section>
@@ -128,19 +132,19 @@
         <!-- الجدول الرئيسي -->
         <main class="bg-gray-800 rounded-2xl border border-gray-700/50 overflow-hidden shadow-xl">
             <div class="overflow-x-auto">
-                <table class="w-full text-right border-collapse">
+                <table class="w-full border-collapse" id="main-table">
                     <thead>
                         <tr class="bg-gray-950/60 border-b border-gray-700 text-xs text-gray-400 font-semibold">
-                            <th class="p-4">الوقت والتاريخ</th>
-                            <th class="p-4">نوع السجل</th>
-                            <th class="p-4">المستخدم (User)</th>
-                            <th class="p-4">نص الرسالة والخطأ من الميكروتك</th>
-                            <th class="p-4">IP الراوتر</th>
+                            <th class="p-4" id="th-date">الوقت والتاريخ</th>
+                            <th class="p-4" id="th-type">نوع السجل</th>
+                            <th class="p-4" id="th-user">المستخدم (User)</th>
+                            <th class="p-4" id="th-msg">نص الرسالة والخطأ من الميكروتك</th>
+                            <th class="p-4" id="th-ip">IP الراوتر</th>
                         </tr>
                     </thead>
                     <tbody id="logs-tbody" class="text-sm divide-y divide-gray-700/40">
                         <tr>
-                            <td colspan="5" class="p-8 text-center text-gray-500">جاري تهيئة الاتصال...</td>
+                            <td colspan="5" class="p-8 text-center text-gray-500" id="td-init">جاري تهيئة الاتصال...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -156,26 +160,115 @@
         let allLogs = [];
         let refreshInterval = null;
         let countdownInterval = null;
-        let timeLeft = 60; // تم التعديل إلى دقيقة واحدة (60 ثانية)
-        let lastCheckedId = null; // لمتابعة آخر سجل تم فحصه لمنع تكرار الصوت لنفس الخطأ القديم
+        let timeLeft = 60; // دقيقة واحدة
+        let lastCheckedId = null;
+        let currentLang = 'ar'; // اللغة الافتراضية
 
-        // دالة لتوليد صوت تنبيه هرتز نقي بدون الحاجة لملفات خارجية
+        // القاموس الخاص بالترجمة ونظام اللغتين
+        const i18n = {
+            ar: {
+                loginTitle: "تسجيل دخول الإدارة", loginSubtitle: "يرجى إدخال البيانات للوصول إلى سجلات الميكروتك",
+                username: "اسم المستخدم", password: "كلمة المرور", btnLogin: "دخول النظام 🔐",
+                errLogin: "❌ اسم المستخدم أو كلمة المرور غير صحيحة!", mainTitle: "شبكة ابداع net",
+                mainSubtitle: "منظومة مراقبة وتحليل سجلات الميكروتك لنظام PPP", lastUpdate: "آخر تحديث:",
+                nextUpdate: "التحديث القادم:", btnRefresh: "🔄 تحديث الآن", btnLogout: "تسجيل الخروج 🚪",
+                stConn: "عدد المتصلين (اليوم)", stConnSub: "✓ جلسات اتصال PPP ناجحة", stDis: "عدد قطع الاتصال (اليوم)",
+                stDisSub: "⚠ عمليات خروج أو فقدان إشارة", stTop: "الأكثر فصلاً (اليوم)", stTopSub: "عدد المرات:",
+                stErr: "مشاكل النظام والأخطاء (اليوم)", stErrSub: "⛔ أخطاء توثيق أو مشاكل كوابل",
+                flUser: "بحث باسم المستخدم (User)", flType: "نوع السجل (الموجود بالداتا بيس فقط)",
+                flDate: "التاريخ", optToday: "اليوم فقط", optAll: "كل الأوقات السابقة", optAllTypes: "كل الأنواع المتوفرة",
+                totalDisp: "إجمالي السجلات المعروضة:", thDate: "الوقت والتاريخ", thType: "نوع السجل",
+                thUser: "المستخدم (User)", thMsg: "نص الرسالة والخطأ من الميكروتك", thIp: "IP الراوتر",
+                noData: "لا توجد سجلات تطابق فلاتر المراقبة حالياً.", loading: "جاري تحديث البيانات وجلب السجلات...",
+                bgConnect: "اتصال ناجح", bgDisconnect: "قطع اتصال", bgAuthErr: "خطأ توثيق/باسورد",
+                bgLinkDown: "⚠️ فصل كابل/إشارة", bgSysErr: "⛔ خطأ سيرفر", bgGen: "معلومات عامة"
+            },
+            en: {
+                loginTitle: "Admin Login", loginSubtitle: "Please enter your credentials to access MikroTik logs",
+                username: "Username", password: "Password", btnLogin: "Login System 🔐",
+                errLogin: "❌ Invalid username or password!", mainTitle: "EbdaNet Network",
+                mainSubtitle: "MikroTik Log Monitoring & Analysis System for PPP", lastUpdate: "Last Update:",
+                nextUpdate: "Next Update:", btnRefresh: "🔄 Refresh Now", btnLogout: "Logout 🚪",
+                stConn: "Connected Today", stConnSub: "✓ Successful PPP Sessions", stDis: "Disconnected Today",
+                stDisSub: "⚠ Logouts or Signal Loss", stTop: "Top Disconnected (Today)", stTopSub: "Times:",
+                stErr: "System Errors (Today)", stErrSub: "⛔ Auth Failures or Link Issues",
+                flUser: "Search Username (User)", flType: "Log Type (Database Dynamic Only)",
+                flDate: "Date Filter", optToday: "Today Only", optAll: "All Time", optAllTypes: "All Available Types",
+                totalDisp: "Total Displayed Logs:", thDate: "Date & Time", thType: "Log Type",
+                thUser: "Username (User)", thMsg: "Log Message / MikroTik Error", thIp: "Router IP",
+                noData: "No matching logs found in monitoring.", loading: "Updating data and fetching server records...",
+                bgConnect: "Connected", bgDisconnect: "Disconnected", bgAuthErr: "Auth Error",
+                bgLinkDown: "⚠️ Link/Signal Down", bgSysErr: "⛔ Server Error", bgGen: "General Info"
+            }
+        };
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            const htmlRoot = document.getElementById('html-root');
+            const mainTable = document.getElementById('main-table');
+            
+            if (currentLang === 'en') {
+                htmlRoot.setAttribute('dir', 'ltr');
+                htmlRoot.setAttribute('lang', 'en');
+                mainTable.classList.remove('text-right');
+                mainTable.classList.add('text-left');
+                event.target.innerText = "🌐 العربية";
+            } else {
+                htmlRoot.setAttribute('dir', 'rtl');
+                htmlRoot.setAttribute('lang', 'ar');
+                mainTable.classList.remove('text-left');
+                mainTable.classList.add('text-right');
+                event.target.innerText = "🌐 English";
+            }
+            updateDOMTexts();
+            applyFilters(); 
+        }
+
+        function updateDOMTexts() {
+            const l = i18n[currentLang];
+            document.getElementById('login-title').innerText = l.loginTitle;
+            document.getElementById('login-subtitle').innerText = l.loginSubtitle;
+            document.getElementById('lbl-username').innerText = l.username;
+            document.getElementById('lbl-password').innerText = l.password;
+            document.getElementById('btn-login').innerText = l.btnLogin;
+            document.getElementById('main-title').innerText = l.mainTitle;
+            document.getElementById('main-subtitle').innerText = l.mainSubtitle;
+            document.getElementById('lbl-last-update').innerText = l.lastUpdate;
+            document.getElementById('lbl-next-update').innerText = l.nextUpdate;
+            document.getElementById('btn-refresh').innerText = l.btnRefresh;
+            document.getElementById('btn-logout').innerText = l.btnLogout;
+            document.getElementById('stat-lbl-connects').innerText = l.stConn;
+            document.getElementById('stat-sub-connects').innerText = l.stConnSub;
+            document.getElementById('stat-lbl-disconnects').innerText = l.stDis;
+            document.getElementById('stat-sub-disconnects').innerText = l.stDisSub;
+            document.getElementById('stat-lbl-top').innerText = l.stTop;
+            document.getElementById('stat-lbl-errors').innerText = l.stErr;
+            document.getElementById('stat-sub-errors').innerText = l.stErrSub;
+            document.getElementById('lbl-filter-user').innerText = l.flUser;
+            document.getElementById('lbl-filter-type').innerText = l.flType;
+            document.getElementById('lbl-filter-date').innerText = l.flDate;
+            document.getElementById('opt-today').innerText = l.optToday;
+            document.getElementById('opt-all').innerText = l.optAll;
+            document.getElementById('opt-all-types').innerText = l.optAllTypes;
+            document.getElementById('th-date').innerText = l.thDate;
+            document.getElementById('th-type').innerText = l.thType;
+            document.getElementById('th-user').innerText = l.thUser;
+            document.getElementById('th-msg').innerText = l.thMsg;
+            document.getElementById('th-ip').innerText = l.thIp;
+        }
+
         function playAlertSound() {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                
-                // النغمة الأولى العالية
                 const oscillator1 = audioCtx.createOscillator();
                 const gainNode1 = audioCtx.createGain();
                 oscillator1.type = 'sine';
-                oscillator1.frequency.setValueAtTime(880, audioCtx.currentTime); // نغمة مرتفعة وحادة
+                oscillator1.frequency.setValueAtTime(880, audioCtx.currentTime);
                 gainNode1.gain.setValueAtTime(0.3, audioCtx.currentTime);
                 oscillator1.connect(gainNode1);
                 gainNode1.connect(audioCtx.destination);
                 oscillator1.start();
                 oscillator1.stop(audioCtx.currentTime + 0.15);
-
-                // النغمة الثانية بعد فترة قصيرة جداً لعمل تأثير إنذار ثنائي
                 setTimeout(() => {
                     const oscillator2 = audioCtx.createOscillator();
                     const gainNode2 = audioCtx.createGain();
@@ -187,10 +280,7 @@
                     oscillator2.start();
                     oscillator2.stop(audioCtx.currentTime + 0.25);
                 }, 150);
-
-            } catch (e) {
-                console.log("فشل تشغيل الصوت بسبب قيود المتصفح: ", e);
-            }
+            } catch (e) { console.log(e); }
         }
 
         function handleLogin(event) {
@@ -205,48 +295,35 @@
                 document.getElementById('dashboard-content').classList.remove('hidden');
                 
                 supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                
-                refreshData(true); // تمرير true للإشارة إلى أنه التحميل الأول ولا نريد إطلاق إنذار للأخطاء القديمة جداً
+                updateDOMTexts();
+                refreshData(true);
                 startTimers();
             } else {
+                document.getElementById('login-error').innerText = i18n[currentLang].errLogin;
                 errorDiv.classList.remove('hidden');
             }
         }
 
-        function handleLogout() {
-            location.reload();
-        }
+        function handleLogout() { location.reload(); }
 
         function startTimers() {
             clearInterval(refreshInterval);
             clearInterval(countdownInterval);
-            timeLeft = 60; // 60 ثانية
-
-            // مؤقت الجلب الفعلي كل دقيقة
-            refreshInterval = setInterval(() => {
-                refreshData(false);
-                timeLeft = 60; 
-            }, 60000);
-
-            // مؤقت الشاشة للعداد التنازلي ثانية بثانية
+            timeLeft = 60;
+            refreshInterval = setInterval(() => { refreshData(false); timeLeft = 60; }, 60000);
             countdownInterval = setInterval(() => {
                 timeLeft--;
                 if (timeLeft < 0) timeLeft = 60;
-                
                 const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
                 const seconds = (timeLeft % 60).toString().padStart(2, '0');
                 document.getElementById('countdown-timer').innerText = `${minutes}:${seconds}`;
             }, 1000);
         }
 
-        function manualRefresh() {
-            refreshData(false);
-            startTimers(); 
-        }
+        function manualRefresh() { refreshData(false); startTimers(); }
 
         async function refreshData(isFirstLoad = false) {
             if (!supabaseClient) return;
-            
             try {
                 const { data, error } = await supabaseClient
                     .from('network_logs')
@@ -254,37 +331,53 @@
                     .order('created_at', { ascending: false })
                     .limit(1000);
 
-                if (error) {
-                    console.error("خطأ سيرفر: ", error.message);
-                    return;
-                }
-
+                if (error) return;
                 allLogs = data || [];
                 
-                // نظام فحص السجلات الجديدة وإطلاق الإنذار الصوتي للأخطاء الحرجة
+                // تحديث طابع آخر وقت جلب للبيانات من السيرفر بنجاح بالثواني
+                const now = new Date();
+                document.getElementById('last-update-time').innerText = now.toLocaleTimeString(currentLang === 'ar' ? 'ar-EG' : 'en-US', { hour12: true });
+
                 if (allLogs.length > 0) {
                     const latestLog = allLogs[0];
-                    
-                    // إذا لم يكن هذا التحميل الأول، وهناك سجل جديد تماماً لم نقم بفحصه بعد
                     if (!isFirstLoad && lastCheckedId && latestLog.id !== lastCheckedId) {
-                        // فلترة السجلات التي وصلت في التحديث الحالي فقط
                         const newLogs = allLogs.filter(log => log.id > lastCheckedId || (typeof log.id === 'string' && log.created_at > allLogs.find(l => l.id === lastCheckedId)?.created_at));
-                        
-                        // فحص إذا كان أي من السجلات الجديدة يحتوي على خطأ حرج
-                        const hasCriticalError = newLogs.some(log => log.log_type === 'System Error' || log.log_type === 'Link Down');
-                        if (hasCriticalError) {
+                        if (newLogs.some(log => log.log_type === 'System Error' || log.log_type === 'Link Down')) {
                             playAlertSound();
                         }
                     }
-                    // تحديث معرف آخر سجل تم التحقق منه
                     lastCheckedId = latestLog.id;
                 }
 
+                // بناء قائمة فلاتر المشاكل المتاحة في الـ Database فعلياً بدون أي قيم وهمية
+                populateDynamicTypesFilter();
                 calculateAnalytics();
                 applyFilters();
 
-            } catch (err) {
-                console.error("فشل اتصال الشبكة: ", err.message);
+            } catch (err) { console.error(err); }
+        }
+
+        // بناء فلتر ديناميكي بالكامل يقرأ الداتا بيس فقط
+        function populateDynamicTypesFilter() {
+            const typeSelect = document.getElementById('filter-type');
+            const currentSelectedValue = typeSelect.value; 
+            
+            // استخراج جميع الأنواع الفريدة المتوفرة حالياً في قاعدة البيانات
+            const uniqueTypes = [...new Set(allLogs.map(log => log.log_type).filter(Boolean))];
+            
+            // تفريغ العناصر القديمة مع الحفاظ على الخيار الأساسي الأول
+            typeSelect.innerHTML = `<option value="">${i18n[currentLang].optAllTypes}</option>`;
+            
+            uniqueTypes.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.innerText = type; 
+                typeSelect.appendChild(option);
+            });
+
+            // الحفاظ على الفلتر النشط الذي اختاره المستخدم إذا كان لا يزال متوفراً
+            if (uniqueTypes.includes(currentSelectedValue)) {
+                typeSelect.value = currentSelectedValue;
             }
         }
 
@@ -312,7 +405,7 @@
                 }
             }
             document.getElementById('stat-top-disconnect').innerText = topUser;
-            document.getElementById('stat-top-disconnect-count').innerText = `عدد المرات: ${topCount}`;
+            document.getElementById('stat-top-disconnect-count').innerText = `${i18n[currentLang].stTopSub} ${topCount}`;
 
             const errorsToday = todayLogs.filter(log => log.log_type === 'System Error' || log.log_type === 'PPP Auth Error' || log.log_type === 'Link Down').length;
             document.getElementById('stat-errors').innerText = errorsToday;
@@ -338,15 +431,7 @@
                 filtered = filtered.filter(log => log.username && log.username.toLowerCase().includes(userQuery));
             }
 
-            const typePriority = {
-                'System Error': 1,
-                'Link Down': 2,
-                'PPP Auth Error': 3,
-                'PPP Disconnect': 4,
-                'PPP Connect': 5,
-                'General Info': 6
-            };
-
+            const typePriority = { 'System Error': 1, 'Link Down': 2, 'PPP Auth Error': 3, 'PPP Disconnect': 4, 'PPP Connect': 5, 'General Info': 6 };
             filtered.sort((a, b) => {
                 const pA = typePriority[a.log_type] || 99;
                 const pB = typePriority[b.log_type] || 99;
@@ -355,31 +440,38 @@
             });
 
             document.getElementById('log-count').innerText = filtered.length;
+            
+            const l = i18n[currentLang];
+            document.getElementById('lbl-total-displayed').innerHTML = `${l.totalDisp} <span id="log-count" class="font-bold text-teal-400">${filtered.length}</span>`;
+            
             renderTable(filtered);
         }
 
         function renderTable(data) {
             const tbody = document.getElementById('logs-tbody');
+            const l = i18n[currentLang];
+            
             if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-500">لا توجد سجلات تطابق فلاتر المراقبة حالياً.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-500">${l.noData}</td></tr>`;
                 return;
             }
 
-            const typeBadges = {
-                'PPP Connect': '<span class="px-2 py-1 text-xs font-semibold rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">اتصال ناجح</span>',
-                'PPP Disconnect': '<span class="px-2 py-1 text-xs font-semibold rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">قطع اتصال</span>',
-                'PPP Auth Error': '<span class="px-2 py-1 text-xs font-semibold rounded bg-red-500/10 text-red-400 border border-red-500/20">خطأ توثيق/باسورد</span>',
-                'Link Down': '<span class="px-2 py-1 text-xs font-semibold rounded bg-orange-500/10 text-orange-400 border border-orange-500/20 animate-pulse">⚠️ فصل كابل/إشارة</span>',
-                'System Error': '<span class="px-2 py-1 text-xs font-semibold rounded bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold animate-pulse">⛔ خطأ سيرفر</span>',
-                'General Info': '<span class="px-2 py-1 text-xs font-semibold rounded bg-gray-700 text-gray-300">معلومات عامة</span>'
-            };
-
             tbody.innerHTML = data.map(log => {
-                const logDate = log.created_at ? new Date(log.created_at).toLocaleString('ar-EG', { hour12: true }) : '---';
+                const logDate = log.created_at ? new Date(log.created_at).toLocaleString(currentLang === 'ar' ? 'ar-EG' : 'en-US', { hour12: true }) : '---';
+                
+                // تحديد نصوص وعناوين الـ Badges محلياً حسب اللغة الحالية لضمان استقرار العرض
+                let typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded bg-gray-700 text-gray-300">${log.log_type}</span>`;
+                if (log.log_type === 'PPP Connect') typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${l.bgConnect}</span>`;
+                else if (log.log_type === 'PPP Disconnect') typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">${l.bgDisconnect}</span>`;
+                else if (log.log_type === 'PPP Auth Error') typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded bg-red-500/10 text-red-400 border border-red-500/20">${l.bgAuthErr}</span>`;
+                else if (log.log_type === 'Link Down') typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded bg-orange-500/10 text-orange-400 border border-orange-500/20 animate-pulse">${l.bgLinkDown}</span>`;
+                else if (log.log_type === 'System Error') typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold animate-pulse">${l.bgSysErr}</span>`;
+                else if (log.log_type === 'General Info') typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded bg-gray-700 text-gray-300">${l.bgGen}</span>`;
+
                 return `
                     <tr class="hover:bg-gray-700/30 transition border-b border-gray-800/50">
                         <td class="p-4 whitespace-nowrap text-xs text-gray-400 font-mono">${logDate}</td>
-                        <td class="p-4 whitespace-nowrap">${typeBadges[log.log_type] || log.log_type}</td>
+                        <td class="p-4 whitespace-nowrap">${typeBadge}</td>
                         <td class="p-4 font-semibold text-gray-200">${log.username || '<span class="text-gray-600">-</span>'}</td>
                         <td class="p-4 text-xs text-gray-300 font-mono select-all max-w-xs md:max-w-xl truncate" title="${log.message}">${log.message}</td>
                         <td class="p-4 whitespace-nowrap text-xs font-mono text-gray-400">${log.router_ip || '-'}</td>
