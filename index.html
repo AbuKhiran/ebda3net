@@ -78,28 +78,28 @@
             </div>
         </header>
 
-        <!-- قسم الإحصائيات الحية لليوم -->
+        <!-- قسم الإحصائيات الحية لليوم (تم إضافة كلاسات الضغط والتفاعل الذكي هنا) -->
         <section class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md">
-                <div id="stat-lbl-connects" class="text-gray-400 text-sm font-medium">عدد المتصلين (اليوم)</div>
+            <div onclick="clickStatFilter('connect')" class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md cursor-pointer hover:border-emerald-500/40 hover:scale-[1.02] active:scale-[0.99] transition-all duration-200 group">
+                <div id="stat-lbl-connects" class="text-gray-400 text-sm font-medium group-hover:text-emerald-300 transition-colors">عدد المتصلين (اليوم)</div>
                 <div id="stat-connects" class="text-3xl font-bold text-emerald-400 mt-2">0</div>
                 <div id="stat-sub-connects" class="text-[10px] text-emerald-500/80 mt-1">✓ جلسات اتصال PPP ناجحة</div>
             </div>
 
-            <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md">
-                <div id="stat-lbl-disconnects" class="text-gray-400 text-sm font-medium">عدد قطع الاتصال (اليوم)</div>
+            <div onclick="clickStatFilter('disconnect')" class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md cursor-pointer hover:border-amber-500/40 hover:scale-[1.02] active:scale-[0.99] transition-all duration-200 group">
+                <div id="stat-lbl-disconnects" class="text-gray-400 text-sm font-medium group-hover:text-amber-300 transition-colors">عدد قطع الاتصال (اليوم)</div>
                 <div id="stat-disconnects" class="text-3xl font-bold text-amber-400 mt-2">0</div>
                 <div id="stat-sub-disconnects" class="text-[10px] text-amber-500/80 mt-1">⚠ عمليات خروج أو فقدان إشارة</div>
             </div>
 
-            <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md">
-                <div id="stat-lbl-top" class="text-gray-400 text-sm font-medium">الأكثر فصلاً (اليوم)</div>
+            <div onclick="clickStatFilter('top-user')" class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md cursor-pointer hover:border-red-500/40 hover:scale-[1.02] active:scale-[0.99] transition-all duration-200 group">
+                <div id="stat-lbl-top" class="text-gray-400 text-sm font-medium group-hover:text-red-300 transition-colors">الأكثر فصلاً (اليوم)</div>
                 <div id="stat-top-disconnect" class="text-xl font-bold text-red-400 mt-2 truncate">---</div>
                 <div id="stat-top-disconnect-count" class="text-[10px] text-red-500/80 mt-1">عدد المرات: 0</div>
             </div>
 
-            <div class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md">
-                <div id="stat-lbl-errors" class="text-gray-400 text-sm font-medium">مشاكل النظام والأخطاء (اليوم)</div>
+            <div onclick="clickStatFilter('errors')" class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md cursor-pointer hover:border-rose-500/40 hover:scale-[1.02] active:scale-[0.99] transition-all duration-200 group">
+                <div id="stat-lbl-errors" class="text-gray-400 text-sm font-medium group-hover:text-rose-300 transition-colors">مشاكل النظام والأخطاء (اليوم)</div>
                 <div id="stat-errors" class="text-3xl font-bold text-rose-500 mt-2">0</div>
                 <div id="stat-sub-errors" class="text-[10px] text-rose-400/80 mt-1">⛔ أخطاء توثيق أو مشاكل كوابل</div>
             </div>
@@ -160,11 +160,12 @@
         let allLogs = [];
         let refreshInterval = null;
         let countdownInterval = null;
-        let timeLeft = 60; // دقيقة واحدة
+        let timeLeft = 60; 
         let lastCheckedId = null;
-        let currentLang = 'ar'; // اللغة الافتراضية
+        let currentLang = 'ar';
+        let globalTopUser = "---"; // لمتابعة أكثر مستخدم فصلاً لليوم بشكل ديناميكي
+        let activeStatFilter = null; // لمتابعة إذا كان هناك فلتر مربعات نشط حالياً
 
-        // القاموس الخاص بالترجمة ونظام اللغتين
         const i18n = {
             ar: {
                 loginTitle: "تسجيل دخول الإدارة", loginSubtitle: "يرجى إدخال البيانات للوصول إلى سجلات الميكروتك",
@@ -322,6 +323,32 @@
 
         function manualRefresh() { refreshData(false); startTimers(); }
 
+        // دالة الفلترة السريعة عند النقر على المربعات العلوية
+        function clickStatFilter(mode) {
+            // تهيئة حقول البحث اليدوية لتفادي التداخل
+            document.getElementById('filter-user').value = "";
+            document.getElementById('filter-type').value = "";
+            document.getElementById('filter-date').value = "today"; // جميع إحصائيات المربعات تخص اليوم
+
+            if (mode === 'connect') {
+                document.getElementById('filter-type').value = "PPP Connect";
+            } else if (mode === 'disconnect') {
+                document.getElementById('filter-type').value = "PPP Disconnect";
+            } else if (mode === 'top-user') {
+                if (globalTopUser && globalTopUser !== "---") {
+                    document.getElementById('filter-user').value = globalTopUser;
+                }
+            } else if (mode === 'errors') {
+                // نضع وسام خاص لتنفيذ فلترة المشاكل المجمعة داخل دالة applyFilters
+                activeStatFilter = 'errors';
+                applyFilters();
+                return;
+            }
+
+            activeStatFilter = null; // إعادة تعيين الوسام الخاص في الحالات الأخرى
+            applyFilters();
+        }
+
         async function refreshData(isFirstLoad = false) {
             if (!supabaseClient) return;
             try {
@@ -334,7 +361,6 @@
                 if (error) return;
                 allLogs = data || [];
                 
-                // تحديث طابع آخر وقت جلب للبيانات من السيرفر بنجاح بالثواني
                 const now = new Date();
                 document.getElementById('last-update-time').innerText = now.toLocaleTimeString(currentLang === 'ar' ? 'ar-EG' : 'en-US', { hour12: true });
 
@@ -349,7 +375,6 @@
                     lastCheckedId = latestLog.id;
                 }
 
-                // بناء قائمة فلاتر المشاكل المتاحة في الـ Database فعلياً بدون أي قيم وهمية
                 populateDynamicTypesFilter();
                 calculateAnalytics();
                 applyFilters();
@@ -357,17 +382,12 @@
             } catch (err) { console.error(err); }
         }
 
-        // بناء فلتر ديناميكي بالكامل يقرأ الداتا بيس فقط
         function populateDynamicTypesFilter() {
             const typeSelect = document.getElementById('filter-type');
             const currentSelectedValue = typeSelect.value; 
-            
-            // استخراج جميع الأنواع الفريدة المتوفرة حالياً في قاعدة البيانات
             const uniqueTypes = [...new Set(allLogs.map(log => log.log_type).filter(Boolean))];
             
-            // تفريغ العناصر القديمة مع الحفاظ على الخيار الأساسي الأول
             typeSelect.innerHTML = `<option value="">${i18n[currentLang].optAllTypes}</option>`;
-            
             uniqueTypes.forEach(type => {
                 const option = document.createElement('option');
                 option.value = type;
@@ -375,7 +395,6 @@
                 typeSelect.appendChild(option);
             });
 
-            // الحفاظ على الفلتر النشط الذي اختاره المستخدم إذا كان لا يزال متوفراً
             if (uniqueTypes.includes(currentSelectedValue)) {
                 typeSelect.value = currentSelectedValue;
             }
@@ -404,6 +423,7 @@
                     topUser = user;
                 }
             }
+            globalTopUser = topUser; // حفظه في المتغير العام للوصول إليه عند الضغط
             document.getElementById('stat-top-disconnect').innerText = topUser;
             document.getElementById('stat-top-disconnect-count').innerText = `${i18n[currentLang].stTopSub} ${topCount}`;
 
@@ -419,18 +439,25 @@
 
             let filtered = [...allLogs];
 
+            // 1. فلترة التاريخ
             if (dateQuery === 'today') {
                 filtered = filtered.filter(log => log.created_at && log.created_at.startsWith(todayStr));
             }
 
-            if (typeQuery) {
+            // 2. فلترة نوع السجل (سواء من المربعات العلوية أو من القائمة المنسدلة)
+            if (activeStatFilter === 'errors') {
+                // إذا تم النقر على مربع الأخطاء والمشاكل، نجلب كل أنواع الأخطاء معاً لليوم
+                filtered = filtered.filter(log => log.log_type === 'System Error' || log.log_type === 'Link Down' || log.log_type === 'PPP Auth Error');
+            } else if (typeQuery) {
                 filtered = filtered.filter(log => log.log_type === typeQuery);
             }
 
+            // 3. فلترة المستخدم
             if (userQuery) {
                 filtered = filtered.filter(log => log.username && log.username.toLowerCase().includes(userQuery));
             }
 
+            // ترتيب السجلات حسب الأولوية والوقت
             const typePriority = { 'System Error': 1, 'Link Down': 2, 'PPP Auth Error': 3, 'PPP Disconnect': 4, 'PPP Connect': 5, 'General Info': 6 };
             filtered.sort((a, b) => {
                 const pA = typePriority[a.log_type] || 99;
@@ -439,8 +466,6 @@
                 return new Date(b.created_at) - new Date(a.created_at);
             });
 
-            document.getElementById('log-count').innerText = filtered.length;
-            
             const l = i18n[currentLang];
             document.getElementById('lbl-total-displayed').innerHTML = `${l.totalDisp} <span id="log-count" class="font-bold text-teal-400">${filtered.length}</span>`;
             
@@ -459,7 +484,6 @@
             tbody.innerHTML = data.map(log => {
                 const logDate = log.created_at ? new Date(log.created_at).toLocaleString(currentLang === 'ar' ? 'ar-EG' : 'en-US', { hour12: true }) : '---';
                 
-                // تحديد نصوص وعناوين الـ Badges محلياً حسب اللغة الحالية لضمان استقرار العرض
                 let typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded bg-gray-700 text-gray-300">${log.log_type}</span>`;
                 if (log.log_type === 'PPP Connect') typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${l.bgConnect}</span>`;
                 else if (log.log_type === 'PPP Disconnect') typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">${l.bgDisconnect}</span>`;
