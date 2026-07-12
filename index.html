@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة تحكم شبكة ابداع net - تسجيل الدخول</title>
-    <!-- Tailwind CSS للتصميم -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- مكتبة Supabase -->
+    <!-- Supabase JS Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
@@ -15,7 +15,7 @@
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen flex items-center justify-center p-4">
 
-    <!-- 1. شاشة تسجيل الدخول المحمية -->
+    <!-- 1. شاشة تسجيل الدخول -->
     <div id="login-card" class="bg-gray-800 p-8 rounded-2xl border border-gray-700/60 shadow-2xl w-full max-w-md transition-all duration-300">
         <div class="text-center mb-6">
             <div class="inline-block bg-teal-600 text-white px-4 py-2 rounded-xl font-bold text-xl mb-3 shadow-lg shadow-teal-600/20">إبداع</div>
@@ -43,9 +43,9 @@
         </form>
     </div>
 
-    <!-- 2. لوحة التحكم الرئيسية (تظهر بعد الصلاحية) -->
+    <!-- 2. لوحة التحكم الرئيسية (تظهر بعد تسجيل الدخول الناجح) -->
     <div id="dashboard-content" class="w-full max-w-7xl mx-auto hidden transition-all duration-500">
-        <!-- ترويسة الموقع الرئيسية -->
+        <!-- الترويسة -->
         <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 border-b border-gray-800 pb-4">
             <div class="flex items-center gap-3">
                 <div class="bg-teal-600 text-white p-3 rounded-xl font-bold text-xl shadow-lg shadow-teal-600/30">إبداع</div>
@@ -75,7 +75,7 @@
             </div>
         </header>
 
-        <!-- قسم الإحصائيات الحية لليوم -->
+        <!-- قسم الإحصائيات -->
         <section class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
             <div onclick="clickStatFilter('connect')" id="box-connect" class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md cursor-pointer hover:border-emerald-500/40 hover:scale-[1.02] active:scale-[0.99] transition-all duration-200 group relative">
                 <div class="flex justify-between items-start">
@@ -159,7 +159,7 @@
                 </table>
             </div>
             
-            <!-- شريط التحكم بالصفحات Navigation Bar المدمج بالجدول -->
+            <!-- شريط التحكم بالصفحات Navigation Bar -->
             <div class="bg-gray-950/40 p-4 border-t border-gray-700 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-400">
                 <div id="nav-info">عرض 0 إلى 0 من إجمالي 0 سجل</div>
                 <div class="flex items-center gap-1 font-mono" id="nav-buttons">
@@ -170,7 +170,7 @@
     </div>
 
     <script>
-        // إعدادات وبيانات الاتصال المباشرة والصريحة بسوبابيس بدون أي تشفير
+        // إعدادات الاتصال المباشرة والصريحة بسوبابيس بدون أي تشفير
         const supabaseUrl = 'https://uuxmwedosgowosmwiextetjexwugk.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ1dXhtd2Vkb3Nnb3dvc213aWV4dGV0amV4d3VnayIsInJlZiI6InV1eG13ZWRvc2dvd29zbXdpZXh0ZXRqZXh3dWdrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTY4ODg3NjYsImV4cCI6MjAzMjQ2NDc2Nn0.V5M8_Q-bZ2v8-x69V8b7b7p_v-28x_4';
 
@@ -312,13 +312,13 @@
             const errorDiv = document.getElementById('login-error');
             const btn = document.getElementById('btn-login');
 
-            // 1. قفل الزر وتغيير النص فوراً لمنع التكرار والتعليق
+            // قفل الزر وتغيير النص فوراً لمنع التكرار والتعليق
             btn.disabled = true;
-            btn.innerText = "...جار التحقق";
+            btn.innerText = "...جاري التحقق";
             errorDiv.classList.add('hidden');
 
             try {
-                // 2. الاستعلام من جدول المستخدمين
+                // الاستعلام من جدول المستخدمين الموحد بـ Supabase
                 const { data: userRow, error } = await supabaseClient
                     .from('system_users')
                     .select('*')
@@ -326,7 +326,6 @@
                     .eq('password', passInp)
                     .maybeSingle();
 
-                // في حال وجود خطأ برمجي واضح من السيرفر أو السوبابيس
                 if (error) {
                     console.error("Supabase Error: ", error);
                     errorDiv.innerText = i18n[currentLang].errDb;
@@ -334,12 +333,11 @@
                     return;
                 }
 
-                // إذا كانت البيانات المدخلة خاطئة ولم يجد يوزر مطابق
                 if (!userRow) {
                     errorDiv.innerText = i18n[currentLang].errLogin;
                     errorDiv.classList.remove('hidden');
                 } else {
-                    // في حال نجاح الدخول، نقوم بإخفاء شاشة تسجيل الدخول وبدء جلب البيانات
+                    // في حال نجاح الدخول، نقوم بإخفاء شاشة تسجيل الدخول وعرض لوحة التحكم
                     document.getElementById('login-card').classList.add('hidden');
                     document.body.className = "bg-gray-900 text-gray-100 min-h-screen p-4 md:p-8 flex flex-col justify-start";
                     document.getElementById('dashboard-content').classList.remove('hidden');
@@ -353,7 +351,7 @@
                 errorDiv.innerText = i18n[currentLang].errDb;
                 errorDiv.classList.remove('hidden');
             } finally {
-                // 3. هذا البلوك يضمن حتماً إرجاع الزر لحالته الطبيعية فلا يعلق على كلمة "جاري التحقق"
+                // يضمن إرجاع الزر لحالته الطبيعية فلا يعلق على كلمة "جاري التحقق"
                 btn.disabled = false;
                 btn.innerText = i18n[currentLang].btnLogin;
             }
