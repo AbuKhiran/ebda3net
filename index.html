@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة تحكم شبكة ابداع نت</title>
-    <!-- Tailwind CSS للتصميم الاحترافي والسريع -->
+    <!-- Tailwind CSS للتصميم -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- مكتبة Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -15,24 +15,6 @@
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen p-4 md:p-8">
 
-    <!-- إعدادات الاتصال بـ Supabase (تظهر لأول مرة فقط لحماية مفاتيحك) -->
-    <div id="setup-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-        <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 w-full max-w-md shadow-2xl">
-            <h3 class="text-xl font-bold text-teal-400 mb-4">الاتصال بقاعدة البيانات لشبكة ابداع نت</h3>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Supabase URL</label>
-                    <input id="db-url" type="text" class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm focus:outline-none focus:border-teal-500">
-                </div>
-                <div>
-                    <label class="block text-sm text-gray-400 mb-1">Supabase Anon KEY</label>
-                    <input id="db-key" type="password" class="w-full bg-gray-900 border border-gray-700 rounded p-2 text-sm focus:outline-none focus:border-teal-500">
-                </div>
-                <button onclick="saveSettings()" class="w-full bg-teal-600 hover:bg-teal-500 text-white font-bold py-2 rounded transition">حفظ والاتصال</button>
-            </div>
-        </div>
-    </div>
-
     <!-- ترويسة الموقع الرئيسية -->
     <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 border-b border-gray-800 pb-4">
         <div class="flex items-center gap-3">
@@ -42,11 +24,10 @@
                 <p class="text-xs text-gray-400">منظومة مراقبة وتحليل سجلات الميكروتك لنظام PPP</p>
             </div>
         </div>
-        <div class="flex items-center gap-2">
+        <div>
             <button onclick="refreshData()" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2 cursor-pointer">
                 🔄 تحديث البيانات
             </button>
-            <button onclick="clearSettings()" class="text-xs text-red-400 hover:underline cursor-pointer">تغيير إعدادات الربط</button>
         </div>
     </header>
 
@@ -124,7 +105,6 @@
                     </tr>
                 </thead>
                 <tbody id="logs-tbody" class="text-sm divide-y divide-gray-700/40">
-                    <!-- سيتم حقن البيانات هنا بواسطة جافاسكربت -->
                     <tr>
                         <td colspan="5" class="p-8 text-center text-gray-500">جاري تحميل البيانات من Supabase...</td>
                     </tr>
@@ -133,84 +113,54 @@
         </div>
     </main>
 
-    <!-- جافاسكربت للربط، الفلترة الذكية، والتحليل -->
     <script>
-        let supabaseClient = null;
+        // إدخال بيانات الربط مباشرة هنا بدون ميمعة الصناديق المنبثقة
+        const SUPABASE_URL = "https://iuokwfigwuebutctaxli.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_BWoVwRtLPrIXzUNqembCtA_P7To3GW-";
+        
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let allLogs = [];
 
-        // التحقق من الإعدادات المحفوظة عند فتح الصفحة
         window.onload = function() {
-            const savedUrl = localStorage.getItem('sb_url');
-            const savedKey = localStorage.getItem('sb_key');
-
-            if (savedUrl && savedKey) {
-                initSupabase(savedUrl, savedKey);
-            } else {
-                document.getElementById('setup-modal').classList.remove('hidden');
-            }
+            refreshData();
         };
 
-        function saveSettings() {
-            const url = document.getElementById('db-url').value.trim();
-            const key = document.getElementById('db-key').value.trim();
-
-            if (url && key) {
-                localStorage.setItem('sb_url', url);
-                localStorage.setItem('sb_key', key);
-                document.getElementById('setup-modal').classList.add('hidden');
-                initSupabase(url, key);
-            } else {
-                alert('الرجاء إدخال الحقول المطلوبة بشكل صحيح.');
-            }
-        }
-
-        function clearSettings() {
-            localStorage.clear();
-            location.reload();
-        }
-
-        function initSupabase(url, key) {
-            supabaseClient = supabase.createClient(url, key);
-            refreshData();
-        }
-
-        // جلب البيانات من Supabase وتطبيق التحليلات المطلوبة منك
+        // جلب البيانات مع معالجة الأخطاء
         async function refreshData() {
-            if (!supabaseClient) return;
+            const tbody = document.getElementById('logs-tbody');
+            tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-400">جاري تحديث البيانات وجلب السجلات...</td></tr>`;
             
-            // جلب آخر 1000 سجل لضمان سرعة الصفحة وكفاءة التحليل
-            const { data, error } = await supabaseClient
-                .from('network_logs')
-                .select('*')
-                .order('created_at', { ascending: false })
-                .limit(1000);
+            try {
+                const { data, error } = await supabaseClient
+                    .from('network_logs')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(1000);
 
-            if (error) {
-                alert('خطأ أثناء جلب البيانات: ' + error.message);
-                return;
+                if (error) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-rose-400 font-semibold">خطأ من Supabase: ${error.message} <br> <span class="text-xs text-gray-400">تأكد من إيقاف الـ RLS على الجدول أو إضافة صلاحيات القراءة (Select).</span></td></tr>`;
+                    return;
+                }
+
+                allLogs = data || [];
+                calculateAnalytics();
+                applyFilters();
+
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-rose-400 font-semibold">فشل الاتصال بالخادم: ${err.message}</td></tr>`;
             }
-
-            allLogs = data || [];
-            calculateAnalytics();
-            applyFilters();
         }
 
-        // 1. حساب الإحصائيات الأربعة المطلوبة
         function calculateAnalytics() {
             const todayStr = new Date().toISOString().split('T')[0];
-            
-            // فلترة سجلات اليوم فقط للحسابات الإحصائية
-            const todayLogs = allLogs.filter(log => log.created_at.startsWith(todayStr));
+            const todayLogs = allLogs.filter(log => log.created_at && log.created_at.startsWith(todayStr));
 
-            // أ. عدد المتصلين اليوم
             const connectsToday = todayLogs.filter(log => log.log_type === 'PPP Connect').length;
             document.getElementById('stat-connects').innerText = connectsToday;
 
-            // ب. عدد المفصولين اليوم
             const disconnectsToday = todayLogs.filter(log => log.log_type === 'PPP Disconnect').length;
             document.getElementById('stat-disconnects').innerText = disconnectsToday;
 
-            // ج. حساب أكثر مستخدم فصل اليوم
             const disconnectCounts = {};
             todayLogs.filter(log => log.log_type === 'PPP Disconnect' && log.username).forEach(log => {
                 disconnectCounts[log.username] = (disconnectCounts[log.username] || 0) + 1;
@@ -227,12 +177,10 @@
             document.getElementById('stat-top-disconnect').innerText = topUser;
             document.getElementById('stat-top-disconnect-count').innerText = `عدد المرات: ${topCount}`;
 
-            // د. إجمالي الأخطاء والمشاكل اليوم (System Errors + PPP Auth Errors)
             const errorsToday = todayLogs.filter(log => log.log_type === 'System Error' || log.log_type === 'PPP Auth Error').length;
             document.getElementById('stat-errors').innerText = errorsToday;
         }
 
-        // 2. تطبيق نظام الفلترة وعرض الجدول والترتيب من الأهم للأقل أهمية
         function applyFilters() {
             const userQuery = document.getElementById('filter-user').value.toLowerCase().trim();
             const typeQuery = document.getElementById('filter-type').value;
@@ -241,22 +189,18 @@
 
             let filtered = [...allLogs];
 
-            // فلترة التاريخ
             if (dateQuery === 'today') {
-                filtered = filtered.filter(log => log.created_at.startsWith(todayStr));
+                filtered = filtered.filter(log => log.created_at && log.created_at.startsWith(todayStr));
             }
 
-            // فلترة نوع اللوج
             if (typeQuery) {
                 filtered = filtered.filter(log => log.log_type === typeQuery);
             }
 
-            // فلترة اسم اليوزر
             if (userQuery) {
                 filtered = filtered.filter(log => log.username && log.username.toLowerCase().includes(userQuery));
             }
 
-            // ترتيب المشاكل من الأهم للأقل أهمية (System Error ثم Auth Error ثم Disconnect ثم البقية)
             const typePriority = {
                 'System Error': 1,
                 'PPP Auth Error': 2,
@@ -269,19 +213,18 @@
             filtered.sort((a, b) => {
                 const pA = typePriority[a.log_type] || 99;
                 const pB = typePriority[b.log_type] || 99;
-                if (pA !== pB) return pA - pB; // الأولوية للنوع الأهم
-                return new Date(b.created_at) - new Date(a.created_at); // ثم الأحدث تاريخاً
+                if (pA !== pB) return pA - pB;
+                return new Date(b.created_at) - new Date(a.created_at);
             });
 
             document.getElementById('log-count').innerText = filtered.length;
             renderTable(filtered);
         }
 
-        // رندرة الجدول داخل الصفحة مع إضافة الألوان المتناسقة لكل نوع خطأ
         function renderTable(data) {
             const tbody = document.getElementById('logs-tbody');
             if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-500">لا توجد بيانات تطابق الفلاتر المحددة.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-500">لا توجد سجلات تطابق البحث الحالي.</td></tr>`;
                 return;
             }
 
@@ -295,14 +238,14 @@
             };
 
             tbody.innerHTML = data.map(log => {
-                const formattedDate = new Date(log.created_at).toLocaleString('ar-EG', { hour12: true });
+                const logDate = log.created_at ? new Date(log.created_at).toLocaleString('ar-EG', { hour12: true }) : '---';
                 return `
                     <tr class="hover:bg-gray-700/30 transition border-b border-gray-800/50">
-                        <td class="p-4 whitespace-nowrap text-xs text-gray-400">${formattedDate}</td>
+                        <td class="p-4 whitespace-nowrap text-xs text-gray-400">${logDate}</td>
                         <td class="p-4 whitespace-nowrap">${typeBadges[log.log_type] || log.log_type}</td>
                         <td class="p-4 font-semibold text-gray-200">${log.username || '<span class="text-gray-600">-</span>'}</td>
                         <td class="p-4 text-xs text-gray-300 font-mono select-all max-w-xs md:max-w-xl truncate" title="${log.message}">${log.message}</td>
-                        <td class="p-4 whitespace-nowrap text-xs font-mono text-gray-400">${log.router_ip}</td>
+                        <td class="p-4 whitespace-nowrap text-xs font-mono text-gray-400">${log.router_ip || ''}</td>
                     </tr>
                 `;
             }).join('');
