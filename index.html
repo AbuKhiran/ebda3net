@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم شبكة ابداع نت - تسجيل الدخول</title>
+    <title>لوحة تحكم شبكة ابداع نت</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -11,104 +11,77 @@
         body { font-family: 'Cairo', sans-serif; }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen flex items-center justify-center p-4">
+<body class="bg-gray-900 text-gray-100 min-h-screen p-4 md:p-8">
 
-    <div id="login-card" class="bg-gray-800 p-8 rounded-2xl border border-gray-700/60 shadow-2xl w-full max-w-md transition-all duration-300">
-        <div class="text-center mb-6">
-            <div class="inline-block bg-teal-600 text-white px-4 py-2 rounded-xl font-bold text-xl mb-3 shadow-lg shadow-teal-600/20">إبداع</div>
-            <h2 id="login-title" class="text-xl font-bold text-gray-100">تسجيل دخول الإدارة</h2>
-        </div>
-        <form onsubmit="handleLogin(event)" class="space-y-4">
-            <div>
-                <label id="lbl-username" class="block text-xs text-gray-400 mb-1">اسم المستخدم</label>
-                <input id="login-username" type="text" required placeholder="admin" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-sm text-gray-200 focus:outline-none focus:border-teal-500 font-mono text-left">
-            </div>
-            <div>
-                <label id="lbl-password" class="block text-xs text-gray-400 mb-1">كلمة المرور</label>
-                <input id="login-password" type="password" required placeholder="••••••••" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-sm text-gray-200 focus:outline-none focus:border-teal-500 font-mono text-left">
-            </div>
-            <div id="login-error" class="text-xs text-rose-400 font-semibold hidden bg-rose-500/10 p-2.5 rounded-lg border border-rose-500/20 text-center">❌ اسم المستخدم أو كلمة المرور غير صحيحة!</div>
-            <button id="btn-login" type="submit" class="w-full bg-teal-600 hover:bg-teal-500 text-white p-2.5 rounded-lg text-sm font-semibold transition cursor-pointer shadow-lg shadow-teal-600/20">دخول النظام 🔐</button>
-        </form>
-    </div>
-
-    <div id="dashboard-content" class="w-full max-w-7xl mx-auto hidden transition-all duration-500">
-        <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 border-b border-gray-800 pb-4">
-            <div class="flex items-center gap-3">
-                <div class="bg-teal-600 text-white p-3 rounded-xl font-bold text-xl shadow-lg shadow-teal-600/30">إبداع</div>
-                <div>
-                    <h1 id="main-title" class="text-2xl font-bold tracking-wide">شبكة ابداع نت</h1>
-                    <p id="main-subtitle" class="text-xs text-gray-400">منظومة مراقبة وتحليل سجلات الميكروتك لنظام PPP</p>
+    <!-- Dashboard Content -->
+    <div id="dashboard-content" class="w-full max-w-7xl mx-auto">
+        
+        <!-- Stats Cards Section -->
+        <section class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div onclick="clickStatFilter('connect')" id="box-connect" class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 cursor-pointer hover:border-emerald-500/40 transition-all">
+                <div class="flex justify-between">
+                    <div class="text-gray-400 text-sm">عدد المتصلين</div>
+                    <button onclick="clearBoxFilter(event)" id="btn-x-connect" class="hidden text-emerald-400 font-bold">✕</button>
                 </div>
+                <div id="stat-connects" class="text-3xl font-bold text-emerald-400 mt-2">0</div>
             </div>
-            <div class="flex flex-wrap items-center gap-3 justify-center">
-                <button onclick="toggleLanguage()" class="bg-gray-800 px-3 py-2 rounded-lg text-xs font-semibold text-teal-400">🌐 English</button>
-                <button id="btn-refresh" onclick="manualRefresh()" class="bg-gray-800 px-4 py-2 rounded-lg text-sm font-semibold">🔄 تحديث الآن</button>
-                <button id="btn-logout" onclick="handleLogout()" class="bg-rose-950/40 px-4 py-2 rounded-lg text-sm font-semibold text-rose-400">تسجيل الخروج 🚪</button>
+            
+            <div onclick="clickStatFilter('disconnect')" id="box-disconnect" class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 cursor-pointer hover:border-amber-500/40 transition-all">
+                <div class="flex justify-between">
+                    <div class="text-gray-400 text-sm">قطع الاتصال</div>
+                    <button onclick="clearBoxFilter(event)" id="btn-x-disconnect" class="hidden text-amber-400 font-bold">✕</button>
+                </div>
+                <div id="stat-disconnects" class="text-3xl font-bold text-amber-400 mt-2">0</div>
             </div>
-        </header>
 
-        <section class="bg-gray-800 p-4 rounded-2xl border border-gray-700/50 mb-6 grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
-            <div>
-                <label class="block text-xs text-gray-400 mb-1">بحث باسم المستخدم</label>
-                <input id="filter-user" type="text" oninput="applyFilters()" placeholder="اكتب اسم اليوزر..." class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-gray-200">
+            <div id="box-top-user" class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50">
+                <div class="text-gray-400 text-sm">الأكثر فصلاً</div>
+                <div id="stat-top-disconnect" class="text-xl font-bold text-red-400 mt-2 truncate">---</div>
             </div>
-            <div>
-                <label class="block text-xs text-gray-400 mb-1">نوع السجل</label>
-                <select id="filter-type" onchange="applyFilters()" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-gray-200">
-                    <option value="">كل الأنواع</option>
-                </select>
+
+            <div onclick="clickStatFilter('errors')" id="box-errors" class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 cursor-pointer hover:border-rose-500/40 transition-all">
+                <div class="flex justify-between">
+                    <div class="text-gray-400 text-sm">أخطاء النظام</div>
+                    <button onclick="clearBoxFilter(event)" id="btn-x-errors" class="hidden text-rose-400 font-bold">✕</button>
+                </div>
+                <div id="stat-errors" class="text-3xl font-bold text-rose-500 mt-2">0</div>
             </div>
-            <div>
-                <label class="block text-xs text-gray-400 mb-1">التاريخ</label>
-                <select id="filter-date" onchange="applyFilters()" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-gray-200">
-                    <option value="today">اليوم فقط</option>
-                    <option value="all">كل التواريخ السابقة</option>
-                </select>
-            </div>
-            <div class="text-xs text-gray-400 pb-2">إجمالي السجلات: <span id="log-count" class="font-bold text-teal-400">0</span></div>
         </section>
 
-        <main class="bg-gray-800 rounded-2xl border border-gray-700/50 overflow-hidden shadow-xl">
-            <table class="w-full border-collapse">
-                <thead>
-                    <tr class="bg-gray-950/60 border-b border-gray-700 text-xs text-gray-400">
-                        <th class="p-4">التاريخ</th>
-                        <th class="p-4">النوع</th>
-                        <th class="p-4">المستخدم</th>
-                        <th class="p-4">الرسالة</th>
-                    </tr>
+        <!-- Filter Section -->
+        <section class="bg-gray-800 p-4 rounded-2xl border border-gray-700/50 mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <input id="filter-user" oninput="applyFilters()" placeholder="بحث باسم المستخدم..." class="bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm">
+            <select id="filter-type" onchange="applyFilters()" class="bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm">
+                <option value="">كل الأنواع</option>
+            </select>
+            <select id="filter-date" onchange="applyFilters()" class="bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm">
+                <option value="today">اليوم فقط</option>
+                <option value="all">كل التواريخ</option>
+            </select>
+        </section>
+
+        <!-- Table -->
+        <main class="bg-gray-800 rounded-2xl border border-gray-700/50 overflow-hidden">
+            <table class="w-full text-right">
+                <thead class="bg-gray-950/60 text-gray-400 text-xs">
+                    <tr><th class="p-4">التاريخ</th><th class="p-4">النوع</th><th class="p-4">المستخدم</th><th class="p-4">الرسالة</th></tr>
                 </thead>
-                <tbody id="logs-tbody" class="text-sm divide-y divide-gray-700/40 text-center">
-                    <tr><td colspan="4" class="p-8">جاري تهيئة البيانات...</td></tr>
-                </tbody>
+                <tbody id="logs-tbody" class="text-sm divide-y divide-gray-700/40"></tbody>
             </table>
         </main>
     </div>
 
     <script>
-        const SUPABASE_URL = "https://iuokwfigwuebutctaxli.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_BWoVwRtLPrIXzUNqembCtA_P7To3GW-";
-        let supabaseClient = null;
+        // ضع مفاتيحك هنا
+        const supabaseClient = supabase.createClient("URL", "KEY");
         let allLogs = [];
-
-        function handleLogin(event) {
-            event.preventDefault();
-            if (document.getElementById('login-username').value === "admin" && document.getElementById('login-password').value === "m@a@2013") {
-                document.getElementById('login-card').classList.add('hidden');
-                document.getElementById('dashboard-content').classList.remove('hidden');
-                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                fetchData();
-            } else {
-                document.getElementById('login-error').classList.remove('hidden');
-            }
-        }
+        let activeStatFilter = null;
 
         async function fetchData() {
             const { data } = await supabaseClient
                 .from('network_logs')
                 .select('*')
-                .lte('created_at', new Date().toISOString()) // منع جلب بيانات المستقبل
+                .lte('created_at', new Date().toISOString())
                 .order('created_at', { ascending: false });
             
             allLogs = data || [];
@@ -117,22 +90,12 @@
         }
 
         function updateDateFilter() {
-            const dateSelect = document.getElementById('filter-date');
-            const today = new Date().toISOString().split('T')[0];
-            const uniqueDates = [...new Set(allLogs.map(log => log.created_at.split('T')[0]))];
-            
-            // ترتيب من الأحدث للأقدم
-            uniqueDates.sort((a, b) => new Date(b) - new Date(a));
-
-            // الحفاظ على الخيارات الأساسية
-            dateSelect.innerHTML = '<option value="today">اليوم فقط</option><option value="all">كل التواريخ</option>';
-            
-            uniqueDates.forEach(date => {
-                if (date <= today) { // منع عرض المستقبل
-                    const option = document.createElement('option');
-                    option.value = date;
-                    option.innerText = date;
-                    dateSelect.appendChild(option);
+            const select = document.getElementById('filter-date');
+            const dates = [...new Set(allLogs.map(l => l.created_at.split('T')[0]))].sort().reverse();
+            // الاحتفاظ بالخيارات الأصلية وإضافة التواريخ
+            dates.forEach(d => {
+                if(!select.querySelector(`option[value="${d}"]`)) {
+                    select.innerHTML += `<option value="${d}">${d}</option>`;
                 }
             });
         }
@@ -144,33 +107,28 @@
             const today = new Date().toISOString().split('T')[0];
 
             let filtered = allLogs.filter(log => {
-                const matchUser = log.username?.toLowerCase().includes(userQ);
-                const matchType = !typeQ || log.log_type === typeQ;
-                let matchDate = true;
-                
-                if (dateQ === 'today') matchDate = log.created_at.startsWith(today);
-                else if (dateQ !== 'all') matchDate = log.created_at.startsWith(dateQ);
-                
-                return matchUser && matchType && matchDate;
+                const matchDate = dateQ === 'today' ? log.created_at.startsWith(today) : 
+                                  dateQ === 'all' ? true : log.created_at.startsWith(dateQ);
+                const matchType = activeStatFilter === 'errors' ? ['System Error', 'Link Down'].includes(log.log_type) :
+                                  activeStatFilter === 'connect' ? log.log_type === 'PPP Connect' :
+                                  activeStatFilter === 'disconnect' ? log.log_type === 'PPP Disconnect' :
+                                  (typeQ ? log.log_type === typeQ : true);
+                return matchDate && matchType && log.username?.toLowerCase().includes(userQ);
             });
 
-            renderTable(filtered);
+            render(filtered);
         }
 
-        function renderTable(data) {
-            const tbody = document.getElementById('logs-tbody');
-            document.getElementById('log-count').innerText = data.length;
-            tbody.innerHTML = data.map(log => `
-                <tr class="hover:bg-gray-700/20">
-                    <td class="p-3">${log.created_at.split('T')[0]}</td>
-                    <td class="p-3">${log.log_type}</td>
-                    <td class="p-3">${log.username || '-'}</td>
-                    <td class="p-3">${log.message || '-'}</td>
-                </tr>
+        function clickStatFilter(mode) { activeStatFilter = mode; applyFilters(); }
+        function clearBoxFilter(e) { e.stopPropagation(); activeStatFilter = null; applyFilters(); }
+
+        function render(data) {
+            document.getElementById('logs-tbody').innerHTML = data.map(log => `
+                <tr><td class="p-3">${log.created_at.split('T')[0]}</td><td class="p-3">${log.log_type}</td><td class="p-3">${log.username}</td><td class="p-3">${log.message}</td></tr>
             `).join('');
         }
 
-        function handleLogout() { location.reload(); }
+        fetchData();
     </script>
 </body>
 </html>
