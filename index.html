@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة تحكم شبكة ابداع نت - تسجيل الدخول</title>
-    <!-- Tailwind CSS للتصميم -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- مكتبة Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
@@ -15,14 +13,11 @@
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen flex items-center justify-center p-4">
 
-    <!-- 1. شاشة تسجيل الدخول المحمية -->
     <div id="login-card" class="bg-gray-800 p-8 rounded-2xl border border-gray-700/60 shadow-2xl w-full max-w-md transition-all duration-300">
         <div class="text-center mb-6">
             <div class="inline-block bg-teal-600 text-white px-4 py-2 rounded-xl font-bold text-xl mb-3 shadow-lg shadow-teal-600/20">إبداع</div>
             <h2 id="login-title" class="text-xl font-bold text-gray-100">تسجيل دخول الإدارة</h2>
-            <p id="login-subtitle" class="text-xs text-gray-400 mt-1">يرجى إدخال البيانات للوصول إلى سجلات الميكروتك</p>
         </div>
-
         <form onsubmit="handleLogin(event)" class="space-y-4">
             <div>
                 <label id="lbl-username" class="block text-xs text-gray-400 mb-1">اسم المستخدم</label>
@@ -32,20 +27,12 @@
                 <label id="lbl-password" class="block text-xs text-gray-400 mb-1">كلمة المرور</label>
                 <input id="login-password" type="password" required placeholder="••••••••" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2.5 text-sm text-gray-200 focus:outline-none focus:border-teal-500 font-mono text-left">
             </div>
-            
-            <div id="login-error" class="text-xs text-rose-400 font-semibold hidden bg-rose-500/10 p-2.5 rounded-lg border border-rose-500/20 text-center">
-                ❌ اسم المستخدم أو كلمة المرور غير صحيحة!
-            </div>
-
-            <button id="btn-login" type="submit" class="w-full bg-teal-600 hover:bg-teal-500 text-white p-2.5 rounded-lg text-sm font-semibold transition cursor-pointer shadow-lg shadow-teal-600/20">
-                دخول النظام 🔐
-            </button>
+            <div id="login-error" class="text-xs text-rose-400 font-semibold hidden bg-rose-500/10 p-2.5 rounded-lg border border-rose-500/20 text-center">❌ اسم المستخدم أو كلمة المرور غير صحيحة!</div>
+            <button id="btn-login" type="submit" class="w-full bg-teal-600 hover:bg-teal-500 text-white p-2.5 rounded-lg text-sm font-semibold transition cursor-pointer shadow-lg shadow-teal-600/20">دخول النظام 🔐</button>
         </form>
     </div>
 
-    <!-- 2. لوحة التحكم الرئيسية (تظهر بعد الصلاحية) -->
     <div id="dashboard-content" class="w-full max-w-7xl mx-auto hidden transition-all duration-500">
-        <!-- ترويسة الموقع الرئيسية -->
         <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 border-b border-gray-800 pb-4">
             <div class="flex items-center gap-3">
                 <div class="bg-teal-600 text-white p-3 rounded-xl font-bold text-xl shadow-lg shadow-teal-600/30">إبداع</div>
@@ -54,515 +41,136 @@
                     <p id="main-subtitle" class="text-xs text-gray-400">منظومة مراقبة وتحليل سجلات الميكروتك لنظام PPP</p>
                 </div>
             </div>
-            
-            <!-- أزرار التحكم واللغة والتوقيت -->
             <div class="flex flex-wrap items-center gap-3 justify-center">
-                <!-- وقت آخر تحديث الذكي -->
-                <div class="text-xs bg-gray-950/80 px-3 py-2 rounded-lg border border-gray-800 text-gray-400 font-mono text-center">
-                    <span id="lbl-last-update">آخر تحديث:</span> <span id="last-update-time" class="text-amber-400 font-bold">--:--:--</span>
-                </div>
-                <div class="text-xs bg-gray-950/80 px-3 py-2 rounded-lg border border-gray-800 text-gray-400 font-mono text-center">
-                    <span id="lbl-next-update">التحديث القادم:</span> <span id="countdown-timer" class="text-teal-400 font-bold">01:00</span>
-                </div>
-                
-                <!-- زر تبديل اللغة -->
-                <button onclick="toggleLanguage()" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 px-3 py-2 rounded-lg text-xs font-semibold text-teal-400 transition cursor-pointer">
-                    🌐 English
-                </button>
-                <button id="btn-refresh" onclick="manualRefresh()" class="bg-gray-800 hover:bg-gray-700 border border-gray-700 px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2 cursor-pointer">
-                    🔄 تحديث الآن
-                </button>
-                <button id="btn-logout" onclick="handleLogout()" class="bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/50 px-4 py-2 rounded-lg text-sm font-semibold text-rose-400 transition cursor-pointer">
-                    تسجيل الخروج 🚪
-                </button>
+                <button onclick="toggleLanguage()" class="bg-gray-800 px-3 py-2 rounded-lg text-xs font-semibold text-teal-400">🌐 English</button>
+                <button id="btn-refresh" onclick="manualRefresh()" class="bg-gray-800 px-4 py-2 rounded-lg text-sm font-semibold">🔄 تحديث الآن</button>
+                <button id="btn-logout" onclick="handleLogout()" class="bg-rose-950/40 px-4 py-2 rounded-lg text-sm font-semibold text-rose-400">تسجيل الخروج 🚪</button>
             </div>
         </header>
 
-        <!-- قسم الإحصائيات الحية لليوم (تم إضافة أزرار X ديناميكية هنا) -->
-        <section class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <!-- مربع المتصلين -->
-            <div onclick="clickStatFilter('connect')" id="box-connect" class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md cursor-pointer hover:border-emerald-500/40 hover:scale-[1.02] active:scale-[0.99] transition-all duration-200 group relative">
-                <div class="flex justify-between items-start">
-                    <div id="stat-lbl-connects" class="text-gray-400 text-sm font-medium group-hover:text-emerald-300 transition-colors">عدد المتصلين (اليوم)</div>
-                    <button onclick="clearBoxFilter(event)" id="btn-x-connect" class="hidden bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-400 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold transition-all duration-150 z-10">✕</button>
-                </div>
-                <div id="stat-connects" class="text-3xl font-bold text-emerald-400 mt-2">0</div>
-                <div id="stat-sub-connects" class="text-[10px] text-emerald-500/80 mt-1">✓ جلسات اتصال PPP ناجحة</div>
-            </div>
-
-            <!-- مربع قطع الاتصال -->
-            <div onclick="clickStatFilter('disconnect')" id="box-disconnect" class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md cursor-pointer hover:border-amber-500/40 hover:scale-[1.02] active:scale-[0.99] transition-all duration-200 group relative">
-                <div class="flex justify-between items-start">
-                    <div id="stat-lbl-disconnects" class="text-gray-400 text-sm font-medium group-hover:text-amber-300 transition-colors">عدد قطع الاتصال (اليوم)</div>
-                    <button onclick="clearBoxFilter(event)" id="btn-x-disconnect" class="hidden bg-amber-500/20 hover:bg-amber-500/40 text-amber-400 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold transition-all duration-150 z-10">✕</button>
-                </div>
-                <div id="stat-disconnects" class="text-3xl font-bold text-amber-400 mt-2">0</div>
-                <div id="stat-sub-disconnects" class="text-[10px] text-amber-500/80 mt-1">⚠ عمليات خروج أو فقدان إشارة</div>
-            </div>
-
-            <!-- مربع الأكثر فصلاً -->
-            <div onclick="clickStatFilter('top-user')" id="box-top-user" class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md cursor-pointer hover:border-red-500/40 hover:scale-[1.02] active:scale-[0.99] transition-all duration-200 group relative">
-                <div class="flex justify-between items-start">
-                    <div id="stat-lbl-top" class="text-gray-400 text-sm font-medium group-hover:text-red-300 transition-colors">الأكثر فصلاً (اليوم)</div>
-                    <button onclick="clearBoxFilter(event)" id="btn-x-top-user" class="hidden bg-red-500/20 hover:bg-red-500/40 text-red-400 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold transition-all duration-150 z-10">✕</button>
-                </div>
-                <div id="stat-top-disconnect" class="text-xl font-bold text-red-400 mt-2 truncate">---</div>
-                <div id="stat-top-disconnect-count" class="text-[10px] text-red-500/80 mt-1">عدد المرات: 0</div>
-            </div>
-
-            <!-- مربع المشاكل والأخطاء -->
-            <div onclick="clickStatFilter('errors')" id="box-errors" class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 shadow-md cursor-pointer hover:border-rose-500/40 hover:scale-[1.02] active:scale-[0.99] transition-all duration-200 group relative">
-                <div class="flex justify-between items-start">
-                    <div id="stat-lbl-errors" class="text-gray-400 text-sm font-medium group-hover:text-rose-300 transition-colors">مشاكل النظام والأخطاء (اليوم)</div>
-                    <button onclick="clearBoxFilter(event)" id="btn-x-errors" class="hidden bg-rose-500/20 hover:bg-rose-500/40 text-rose-400 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold transition-all duration-150 z-10">✕</button>
-                </div>
-                <div id="stat-errors" class="text-3xl font-bold text-rose-500 mt-2">0</div>
-                <div id="stat-sub-errors" class="text-[10px] text-rose-400/80 mt-1">⛔ أخطاء توثيق أو مشاكل كوابل</div>
-            </div>
-        </section>
-
-        <!-- الفلاتر الذكية والبحث المتقدم -->
         <section class="bg-gray-800 p-4 rounded-2xl border border-gray-700/50 mb-6 grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
             <div>
-                <label id="lbl-filter-user" class="block text-xs text-gray-400 mb-1">بحث باسم المستخدم (User)</label>
-                <input id="filter-user" type="text" oninput="applyFilters()" placeholder="اكتب اسم اليوزر..." class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-teal-500">
+                <label class="block text-xs text-gray-400 mb-1">بحث باسم المستخدم</label>
+                <input id="filter-user" type="text" oninput="applyFilters()" placeholder="اكتب اسم اليوزر..." class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-gray-200">
             </div>
             <div>
-                <label id="lbl-filter-type" class="block text-xs text-gray-400 mb-1">نوع السجل (الموجود بالداتا بيس فقط)</label>
-                <select id="filter-type" onchange="applyFilters()" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-teal-500">
-                    <option id="opt-all-types" value="">كل الأنواع المتوفرة</option>
+                <label class="block text-xs text-gray-400 mb-1">نوع السجل</label>
+                <select id="filter-type" onchange="applyFilters()" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-gray-200">
+                    <option value="">كل الأنواع</option>
                 </select>
             </div>
             <div>
-                <label id="lbl-filter-date" class="block text-xs text-gray-400 mb-1">التاريخ</label>
-                <select id="filter-date" onchange="applyFilters()" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-gray-200 focus:outline-none focus:border-teal-500">
-                    <option id="opt-today" value="today">اليوم فقط</option>
-                    <option id="opt-all" value="all">كل الأوقات السابقة</option>
+                <label class="block text-xs text-gray-400 mb-1">التاريخ</label>
+                <select id="filter-date" onchange="applyFilters()" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm text-gray-200">
+                    <option value="today">اليوم فقط</option>
+                    <option value="all">كل التواريخ السابقة</option>
                 </select>
             </div>
-            <div id="lbl-total-displayed" class="text-xs text-gray-400 pb-2">
-                إجمالي السجلات المعروضة: <span id="log-count" class="font-bold text-teal-400">0</span>
-            </div>
+            <div class="text-xs text-gray-400 pb-2">إجمالي السجلات: <span id="log-count" class="font-bold text-teal-400">0</span></div>
         </section>
 
-        <!-- الجدول الرئيسي -->
         <main class="bg-gray-800 rounded-2xl border border-gray-700/50 overflow-hidden shadow-xl">
-            <div class="overflow-x-auto">
-                <table class="w-full border-collapse" id="main-table">
-                    <thead>
-                        <tr class="bg-gray-950/60 border-b border-gray-700 text-xs text-gray-400 font-semibold">
-                            <th class="p-4" id="th-date">الوقت والتاريخ</th>
-                            <th class="p-4" id="th-type">نوع السجل</th>
-                            <th class="p-4" id="th-user">المستخدم (User)</th>
-                            <th class="p-4" id="th-msg">نص الرسالة والخطأ من الميكروتك</th>
-                            <th class="p-4" id="th-ip">IP الراوتر</th>
-                        </tr>
-                    </thead>
-                    <tbody id="logs-tbody" class="text-sm divide-y divide-gray-700/40">
-                        <tr>
-                            <td colspan="5" class="p-8 text-center text-gray-500" id="td-init">جاري تهيئة الاتصال...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="bg-gray-950/60 border-b border-gray-700 text-xs text-gray-400">
+                        <th class="p-4">التاريخ</th>
+                        <th class="p-4">النوع</th>
+                        <th class="p-4">المستخدم</th>
+                        <th class="p-4">الرسالة</th>
+                    </tr>
+                </thead>
+                <tbody id="logs-tbody" class="text-sm divide-y divide-gray-700/40 text-center">
+                    <tr><td colspan="4" class="p-8">جاري تهيئة البيانات...</td></tr>
+                </tbody>
+            </table>
         </main>
     </div>
 
     <script>
         const SUPABASE_URL = "https://iuokwfigwuebutctaxli.supabase.co";
         const SUPABASE_KEY = "sb_publishable_BWoVwRtLPrIXzUNqembCtA_P7To3GW-";
-        
         let supabaseClient = null;
         let allLogs = [];
-        let refreshInterval = null;
-        let countdownInterval = null;
-        let timeLeft = 60; 
-        let lastCheckedId = null;
-        let currentLang = 'ar';
-        let globalTopUser = "---"; 
-        let activeStatFilter = null; 
-
-        const i18n = {
-            ar: {
-                loginTitle: "تسجيل دخول الإدارة", loginSubtitle: "يرجى إدخال البيانات للوصول إلى سجلات الميكروتك",
-                username: "اسم المستخدم", password: "كلمة المرور", btnLogin: "دخول النظام 🔐",
-                errLogin: "❌ اسم المستخدم أو كلمة المرور غير صحيحة!", mainTitle: "شبكة ابداع net",
-                mainSubtitle: "منظومة مراقبة وتحليل سجلات الميكروتك لنظام PPP", lastUpdate: "آخر تحديث:",
-                nextUpdate: "التحديث القادم:", btnRefresh: "🔄 تحديث الآن", btnLogout: "تسجيل الخروج 🚪",
-                stConn: "عدد المتصلين (اليوم)", stConnSub: "✓ جلسات اتصال PPP ناجحة", stDis: "عدد قطع الاتصال (اليوم)",
-                stDisSub: "⚠ عمليات خروج أو فقدان إشارة", stTop: "الأكثر فصلاً (اليوم)", stTopSub: "عدد المرات:",
-                stErr: "مشاكل النظام والأخطاء (اليوم)", stErrSub: "⛔ أخطاء توثيق أو مشاكل كوابل",
-                flUser: "بحث باسم المستخدم (User)", flType: "نوع السجل (الموجود بالداتا بيس فقط)",
-                flDate: "التاريخ", optToday: "اليوم فقط", optAll: "كل الأوقات السابقة", optAllTypes: "كل الأنواع المتوفرة",
-                totalDisp: "إجمالي السجلات المعروضة:", thDate: "الوقت والتاريخ", thType: "نوع السجل",
-                thUser: "المستخدم (User)", thMsg: "نص الرسالة والخطأ من الميكروتك", thIp: "IP الراوتر",
-                noData: "لا توجد سجلات تطابق فلاتر المراقبة حالياً.", loading: "جاري تحديث البيانات وجلب السجلات...",
-                bgConnect: "اتصال ناجح", bgDisconnect: "قطع اتصال", bgAuthErr: "خطأ توثيق/باسورد",
-                bgLinkDown: "⚠️ فصل كابل/إشارة", bgSysErr: "⛔ خطأ سيرفر", bgGen: "معلومات عامة"
-            },
-            en: {
-                loginTitle: "Admin Login", loginSubtitle: "Please enter your credentials to access MikroTik logs",
-                username: "Username", password: "Password", btnLogin: "Login System 🔐",
-                errLogin: "❌ Invalid username or password!", mainTitle: "EbdaNet Network",
-                mainSubtitle: "MikroTik Log Monitoring & Analysis System for PPP", lastUpdate: "Last Update:",
-                nextUpdate: "Next Update:", btnRefresh: "🔄 Refresh Now", btnLogout: "Logout 🚪",
-                stConn: "Connected Today", stConnSub: "✓ Successful PPP Sessions", stDis: "Disconnected Today",
-                stDisSub: "⚠ Logouts or Signal Loss", stTop: "Top Disconnected (Today)", stTopSub: "Times:",
-                stErr: "System Errors (Today)", stErrSub: "⛔ Auth Failures or Link Issues",
-                flUser: "Search Username (User)", flType: "Log Type (Database Dynamic Only)",
-                flDate: "Date Filter", optToday: "Today Only", optAll: "All Time", optAllTypes: "All Available Types",
-                totalDisp: "Total Displayed Logs:", thDate: "Date & Time", thType: "Log Type",
-                thUser: "Username (User)", thMsg: "Log Message / MikroTik Error", thIp: "Router IP",
-                noData: "No matching logs found in monitoring.", loading: "Updating data and fetching server records...",
-                bgConnect: "Connected", bgDisconnect: "Disconnected", bgAuthErr: "Auth Error",
-                bgLinkDown: "⚠️ Link/Signal Down", bgSysErr: "⛔ Server Error", bgGen: "General Info"
-            }
-        };
-
-        function toggleLanguage() {
-            currentLang = currentLang === 'ar' ? 'en' : 'ar';
-            const htmlRoot = document.getElementById('html-root');
-            const mainTable = document.getElementById('main-table');
-            
-            if (currentLang === 'en') {
-                htmlRoot.setAttribute('dir', 'ltr');
-                htmlRoot.setAttribute('lang', 'en');
-                mainTable.classList.remove('text-right');
-                mainTable.classList.add('text-left');
-                event.target.innerText = "🌐 العربية";
-            } else {
-                htmlRoot.setAttribute('dir', 'rtl');
-                htmlRoot.setAttribute('lang', 'ar');
-                mainTable.classList.remove('text-left');
-                mainTable.classList.add('text-right');
-                event.target.innerText = "🌐 English";
-            }
-            updateDOMTexts();
-            applyFilters(); 
-        }
-
-        function updateDOMTexts() {
-            const l = i18n[currentLang];
-            document.getElementById('login-title').innerText = l.loginTitle;
-            document.getElementById('login-subtitle').innerText = l.loginSubtitle;
-            document.getElementById('lbl-username').innerText = l.username;
-            document.getElementById('lbl-password').innerText = l.password;
-            document.getElementById('btn-login').innerText = l.btnLogin;
-            document.getElementById('main-title').innerText = l.mainTitle;
-            document.getElementById('main-subtitle').innerText = l.mainSubtitle;
-            document.getElementById('lbl-last-update').innerText = l.lastUpdate;
-            document.getElementById('lbl-next-update').innerText = l.nextUpdate;
-            document.getElementById('btn-refresh').innerText = l.btnRefresh;
-            document.getElementById('btn-logout').innerText = l.btnLogout;
-            document.getElementById('stat-lbl-connects').innerText = l.stConn;
-            document.getElementById('stat-sub-connects').innerText = l.stConnSub;
-            document.getElementById('stat-lbl-disconnects').innerText = l.stDis;
-            document.getElementById('stat-sub-disconnects').innerText = l.stDisSub;
-            document.getElementById('stat-lbl-top').innerText = l.stTop;
-            document.getElementById('stat-lbl-errors').innerText = l.stErr;
-            document.getElementById('stat-sub-errors').innerText = l.stErrSub;
-            document.getElementById('lbl-filter-user').innerText = l.flUser;
-            document.getElementById('lbl-filter-type').innerText = l.flType;
-            document.getElementById('lbl-filter-date').innerText = l.flDate;
-            document.getElementById('opt-today').innerText = l.optToday;
-            document.getElementById('opt-all').innerText = l.optAll;
-            document.getElementById('opt-all-types').innerText = l.optAllTypes;
-            document.getElementById('th-date').innerText = l.thDate;
-            document.getElementById('th-type').innerText = l.thType;
-            document.getElementById('th-user').innerText = l.thUser;
-            document.getElementById('th-msg').innerText = l.thMsg;
-            document.getElementById('th-ip').innerText = l.thIp;
-        }
-
-        function playAlertSound() {
-            try {
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator1 = audioCtx.createOscillator();
-                const gainNode1 = audioCtx.createGain();
-                oscillator1.type = 'sine';
-                oscillator1.frequency.setValueAtTime(880, audioCtx.currentTime);
-                gainNode1.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                oscillator1.connect(gainNode1);
-                gainNode1.connect(audioCtx.destination);
-                oscillator1.start();
-                oscillator1.stop(audioCtx.currentTime + 0.15);
-                setTimeout(() => {
-                    const oscillator2 = audioCtx.createOscillator();
-                    const gainNode2 = audioCtx.createGain();
-                    oscillator2.type = 'sine';
-                    oscillator2.frequency.setValueAtTime(660, audioCtx.currentTime);
-                    gainNode2.gain.setValueAtTime(0.3, audioCtx.currentTime);
-                    oscillator2.connect(gainNode2);
-                    gainNode2.connect(audioCtx.destination);
-                    oscillator2.start();
-                    oscillator2.stop(audioCtx.currentTime + 0.25);
-                }, 150);
-            } catch (e) { console.log(e); }
-        }
 
         function handleLogin(event) {
             event.preventDefault();
-            const userInp = document.getElementById('login-username').value.trim();
-            const passInp = document.getElementById('login-password').value.trim();
-            const errorDiv = document.getElementById('login-error');
-
-            if (userInp === "admin" && passInp === "m@a@2013") {
+            if (document.getElementById('login-username').value === "admin" && document.getElementById('login-password').value === "m@a@2013") {
                 document.getElementById('login-card').classList.add('hidden');
-                document.body.className = "bg-gray-900 text-gray-100 min-h-screen p-4 md:p-8 flex flex-col justify-start";
                 document.getElementById('dashboard-content').classList.remove('hidden');
-                
                 supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                updateDOMTexts();
-                refreshData(true);
-                startTimers();
+                fetchData();
             } else {
-                document.getElementById('login-error').innerText = i18n[currentLang].errLogin;
-                errorDiv.classList.remove('hidden');
+                document.getElementById('login-error').classList.remove('hidden');
             }
         }
 
-        function handleLogout() { location.reload(); }
-
-        function startTimers() {
-            clearInterval(refreshInterval);
-            clearInterval(countdownInterval);
-            timeLeft = 60;
-            refreshInterval = setInterval(() => { refreshData(false); timeLeft = 60; }, 60000);
-            countdownInterval = setInterval(() => {
-                timeLeft--;
-                if (timeLeft < 0) timeLeft = 60;
-                const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-                const seconds = (timeLeft % 60).toString().padStart(2, '0');
-                document.getElementById('countdown-timer').innerText = `${minutes}:${seconds}`;
-            }, 1000);
-        }
-
-        function manualRefresh() { refreshData(false); startTimers(); }
-
-        // دالة الفلترة السريعة عند النقر على المربعات العلوية
-        function clickStatFilter(mode) {
-            if (activeStatFilter === mode) return; // لمنع إعادة التهيئة إذا كان نفس الفلتر مضغوطاً
-
-            activeStatFilter = mode;
-
-            // تهيئة حقول البحث اليدوية لتفادي التداخل
-            document.getElementById('filter-user').value = "";
-            document.getElementById('filter-type').value = "";
-            document.getElementById('filter-date').value = "today"; 
-
-            if (mode === 'connect') {
-                document.getElementById('filter-type').value = "PPP Connect";
-            } else if (mode === 'disconnect') {
-                document.getElementById('filter-type').value = "PPP Disconnect";
-            } else if (mode === 'top-user') {
-                if (globalTopUser && globalTopUser !== "---") {
-                    document.getElementById('filter-user').value = globalTopUser;
-                }
-            }
-
-            applyFilters();
-        }
-
-        // دالة زر X المخصصة لإلغاء الفلترة وإعادة تهيئة البيانات فوراً
-        function clearBoxFilter(event) {
-            event.stopPropagation(); // منع انتقال النقرة للمربع نفسه
-            activeStatFilter = null;
-            document.getElementById('filter-user').value = "";
-            document.getElementById('filter-type').value = "";
-            document.getElementById('filter-date').value = "today";
-            applyFilters();
-        }
-
-        async function refreshData(isFirstLoad = false) {
-            if (!supabaseClient) return;
-            try {
-                const { data, error } = await supabaseClient
-                    .from('network_logs')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(1000);
-
-                if (error) return;
-                allLogs = data || [];
-                
-                const now = new Date();
-                document.getElementById('last-update-time').innerText = now.toLocaleTimeString(currentLang === 'ar' ? 'ar-EG' : 'en-US', { hour12: true });
-
-                if (allLogs.length > 0) {
-                    const latestLog = allLogs[0];
-                    if (!isFirstLoad && lastCheckedId && latestLog.id !== lastCheckedId) {
-                        const newLogs = allLogs.filter(log => log.id > lastCheckedId || (typeof log.id === 'string' && log.created_at > allLogs.find(l => l.id === lastCheckedId)?.created_at));
-                        if (newLogs.some(log => log.log_type === 'System Error' || log.log_type === 'Link Down')) {
-                            playAlertSound();
-                        }
-                    }
-                    lastCheckedId = latestLog.id;
-                }
-
-                populateDynamicTypesFilter();
-                calculateAnalytics();
-                applyFilters();
-
-            } catch (err) { console.error(err); }
-        }
-
-        function populateDynamicTypesFilter() {
-            const typeSelect = document.getElementById('filter-type');
-            const currentSelectedValue = typeSelect.value; 
-            const uniqueTypes = [...new Set(allLogs.map(log => log.log_type).filter(Boolean))];
+        async function fetchData() {
+            const { data } = await supabaseClient
+                .from('network_logs')
+                .select('*')
+                .lte('created_at', new Date().toISOString()) // منع جلب بيانات المستقبل
+                .order('created_at', { ascending: false });
             
-            typeSelect.innerHTML = `<option value="">${i18n[currentLang].optAllTypes}</option>`;
-            uniqueTypes.forEach(type => {
-                const option = document.createElement('option');
-                option.value = type;
-                option.innerText = type; 
-                typeSelect.appendChild(option);
-            });
-
-            if (uniqueTypes.includes(currentSelectedValue)) {
-                typeSelect.value = currentSelectedValue;
-            }
+            allLogs = data || [];
+            updateDateFilter();
+            applyFilters();
         }
 
-        function calculateAnalytics() {
-            const todayStr = new Date().toISOString().split('T')[0];
-            const todayLogs = allLogs.filter(log => log.created_at && log.created_at.startsWith(todayStr));
+        function updateDateFilter() {
+            const dateSelect = document.getElementById('filter-date');
+            const today = new Date().toISOString().split('T')[0];
+            const uniqueDates = [...new Set(allLogs.map(log => log.created_at.split('T')[0]))];
+            
+            // ترتيب من الأحدث للأقدم
+            uniqueDates.sort((a, b) => new Date(b) - new Date(a));
 
-            const connectsToday = todayLogs.filter(log => log.log_type === 'PPP Connect').length;
-            document.getElementById('stat-connects').innerText = connectsToday;
-
-            const disconnectsToday = todayLogs.filter(log => log.log_type === 'PPP Disconnect').length;
-            document.getElementById('stat-disconnects').innerText = disconnectsToday;
-
-            const disconnectCounts = {};
-            todayLogs.filter(log => log.log_type === 'PPP Disconnect' && log.username).forEach(log => {
-                disconnectCounts[log.username] = (disconnectCounts[log.username] || 0) + 1;
-            });
-
-            let topUser = "---";
-            let topCount = 0;
-            for (const user in disconnectCounts) {
-                if (disconnectCounts[user] > topCount) {
-                    topCount = disconnectCounts[user];
-                    topUser = user;
+            // الحفاظ على الخيارات الأساسية
+            dateSelect.innerHTML = '<option value="today">اليوم فقط</option><option value="all">كل التواريخ</option>';
+            
+            uniqueDates.forEach(date => {
+                if (date <= today) { // منع عرض المستقبل
+                    const option = document.createElement('option');
+                    option.value = date;
+                    option.innerText = date;
+                    dateSelect.appendChild(option);
                 }
-            }
-            globalTopUser = topUser; 
-            document.getElementById('stat-top-disconnect').innerText = topUser;
-            document.getElementById('stat-top-disconnect-count').innerText = `${i18n[currentLang].stTopSub} ${topCount}`;
-
-            const errorsToday = todayLogs.filter(log => log.log_type === 'System Error' || log.log_type === 'PPP Auth Error' || log.log_type === 'Link Down').length;
-            document.getElementById('stat-errors').innerText = errorsToday;
+            });
         }
 
         function applyFilters() {
-            const userQuery = document.getElementById('filter-user').value.toLowerCase().trim();
-            const typeQuery = document.getElementById('filter-type').value;
-            const dateQuery = document.getElementById('filter-date').value;
-            const todayStr = new Date().toISOString().split('T')[0];
+            const userQ = document.getElementById('filter-user').value.toLowerCase();
+            const typeQ = document.getElementById('filter-type').value;
+            const dateQ = document.getElementById('filter-date').value;
+            const today = new Date().toISOString().split('T')[0];
 
-            let filtered = [...allLogs];
-
-            // إذا قام المستخدم بتعديل الفلاتر اليدوية، نلغي تفعيل المربعات العلوية تلقائياً
-            if (activeStatFilter && activeStatFilter !== 'errors' && !typeQuery && !userQuery) {
-                activeStatFilter = null;
-            }
-
-            // 1. فلترة التاريخ
-            if (dateQuery === 'today') {
-                filtered = filtered.filter(log => log.created_at && log.created_at.startsWith(todayStr));
-            }
-
-            // 2. فلترة نوع السجل
-            if (activeStatFilter === 'errors') {
-                filtered = filtered.filter(log => log.log_type === 'System Error' || log.log_type === 'Link Down' || log.log_type === 'PPP Auth Error');
-            } else if (typeQuery) {
-                filtered = filtered.filter(log => log.log_type === typeQuery);
-            }
-
-            // 3. فلترة المستخدم
-            if (userQuery) {
-                filtered = filtered.filter(log => log.username && log.username.toLowerCase().includes(userQuery));
-            }
-
-            // تحديث ستايل المربعات والتحكم بظهور أزرار X
-            updateStatBoxUI();
-
-            // ترتيب السجلات حسب الأولوية والوقت
-            const typePriority = { 'System Error': 1, 'Link Down': 2, 'PPP Auth Error': 3, 'PPP Disconnect': 4, 'PPP Connect': 5, 'General Info': 6 };
-            filtered.sort((a, b) => {
-                const pA = typePriority[a.log_type] || 99;
-                const pB = typePriority[b.log_type] || 99;
-                if (pA !== pB) return pA - pB;
-                return new Date(b.created_at) - new Date(a.created_at);
+            let filtered = allLogs.filter(log => {
+                const matchUser = log.username?.toLowerCase().includes(userQ);
+                const matchType = !typeQ || log.log_type === typeQ;
+                let matchDate = true;
+                
+                if (dateQ === 'today') matchDate = log.created_at.startsWith(today);
+                else if (dateQ !== 'all') matchDate = log.created_at.startsWith(dateQ);
+                
+                return matchUser && matchType && matchDate;
             });
 
-            const l = i18n[currentLang];
-            document.getElementById('lbl-total-displayed').innerHTML = `${l.totalDisp} <span id="log-count" class="font-bold text-teal-400">${filtered.length}</span>`;
-            
             renderTable(filtered);
-        }
-
-        // دالة التحكم بشكل المربعات وظهور زر الـ X بناءً على الفلتر النشط
-        function updateStatBoxUI() {
-            const boxes = {
-                'connect': { wrapper: document.getElementById('box-connect'), btnX: document.getElementById('btn-x-connect'), border: 'border-emerald-500' },
-                'disconnect': { wrapper: document.getElementById('box-disconnect'), btnX: document.getElementById('btn-x-disconnect'), border: 'border-amber-500' },
-                'top-user': { wrapper: document.getElementById('box-top-user'), btnX: document.getElementById('btn-x-top-user'), border: 'border-red-500' },
-                'errors': { wrapper: document.getElementById('box-errors'), btnX: document.getElementById('btn-x-errors'), border: 'border-rose-500' }
-            };
-
-            for (const key in boxes) {
-                if (boxes[key].wrapper && boxes[key].btnX) {
-                    if (activeStatFilter === key) {
-                        // إظهار البوردر الملون والإضاءة وزر X للمربع المفلتر حالياً
-                        boxes[key].wrapper.classList.add(boxes[key].border, 'bg-gray-800/90', 'ring-1', 'ring-opacity-50');
-                        if(key === 'connect') boxes[key].wrapper.classList.add('ring-emerald-500');
-                        if(key === 'disconnect') boxes[key].wrapper.classList.add('ring-amber-500');
-                        if(key === 'top-user') boxes[key].wrapper.classList.add('ring-red-500');
-                        if(key === 'errors') boxes[key].wrapper.classList.add('ring-rose-500');
-                        
-                        boxes[key].btnX.classList.remove('hidden');
-                    } else {
-                        // إرجاع المربعات الأخرى لشكلها العادي وإخفاء زر X عنها
-                        boxes[key].wrapper.classList.remove('border-emerald-500', 'border-amber-500', 'border-red-500', 'border-rose-500', 'ring-1', 'ring-emerald-500', 'ring-amber-500', 'ring-red-500', 'ring-rose-500');
-                        boxes[key].btnX.classList.add('hidden');
-                    }
-                }
-            }
         }
 
         function renderTable(data) {
             const tbody = document.getElementById('logs-tbody');
-            const l = i18n[currentLang];
-            
-            if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-500">${l.noData}</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = data.map(log => {
-                const logDate = log.created_at ? new Date(log.created_at).toLocaleString(currentLang === 'ar' ? 'ar-EG' : 'en-US', { hour12: true }) : '---';
-                
-                let typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded bg-gray-700 text-gray-300">${log.log_type}</span>`;
-                if (log.log_type === 'PPP Connect') typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">${l.bgConnect}</span>`;
-                else if (log.log_type === 'PPP Disconnect') typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">${l.bgDisconnect}</span>`;
-                else if (log.log_type === 'PPP Auth Error') typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded bg-red-500/10 text-red-400 border border-red-500/20">${l.bgAuthErr}</span>`;
-                else if (log.log_type === 'Link Down') typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded bg-orange-500/10 text-orange-400 border border-orange-500/20 animate-pulse">${l.bgLinkDown}</span>`;
-                else if (log.log_type === 'System Error') typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold animate-pulse">${l.bgSysErr}</span>`;
-                else if (log.log_type === 'General Info') typeBadge = `<span class="px-2 py-1 text-xs font-semibold rounded bg-gray-700 text-gray-300">${l.bgGen}</span>`;
-
-                return `
-                    <tr class="hover:bg-gray-700/30 transition border-b border-gray-800/50">
-                        <td class="p-4 whitespace-nowrap text-xs text-gray-400 font-mono">${logDate}</td>
-                        <td class="p-4 whitespace-nowrap">${typeBadge}</td>
-                        <td class="p-4 font-semibold text-gray-200">${log.username || '<span class="text-gray-600">-</span>'}</td>
-                        <td class="p-4 text-xs text-gray-300 font-mono select-all max-w-xs md:max-w-xl truncate" title="${log.message}">${log.message}</td>
-                        <td class="p-4 whitespace-nowrap text-xs font-mono text-gray-400">${log.router_ip || '-'}</td>
-                    </tr>
-                `;
-            }).join('');
+            document.getElementById('log-count').innerText = data.length;
+            tbody.innerHTML = data.map(log => `
+                <tr class="hover:bg-gray-700/20">
+                    <td class="p-3">${log.created_at.split('T')[0]}</td>
+                    <td class="p-3">${log.log_type}</td>
+                    <td class="p-3">${log.username || '-'}</td>
+                    <td class="p-3">${log.message || '-'}</td>
+                </tr>
+            `).join('');
         }
+
+        function handleLogout() { location.reload(); }
     </script>
 </body>
 </html>
