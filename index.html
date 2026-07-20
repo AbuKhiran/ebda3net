@@ -72,7 +72,6 @@
     </div>
 
     <script>
-        // ضع مفاتيحك هنا
         const supabaseClient = supabase.createClient("URL", "KEY");
         let allLogs = [];
         let activeStatFilter = null;
@@ -81,7 +80,6 @@
             const { data } = await supabaseClient
                 .from('network_logs')
                 .select('*')
-                .lte('created_at', new Date().toISOString())
                 .order('created_at', { ascending: false });
             
             allLogs = data || [];
@@ -91,12 +89,15 @@
 
         function updateDateFilter() {
             const select = document.getElementById('filter-date');
+            // الحفاظ على الخيارات الثابتة
+            const staticOptions = `<option value="today">اليوم فقط</option><option value="all">كل التواريخ</option>`;
+            
+            // استخراج التواريخ الفريدة فقط
             const dates = [...new Set(allLogs.map(l => l.created_at.split('T')[0]))].sort().reverse();
-            // الاحتفاظ بالخيارات الأصلية وإضافة التواريخ
+            
+            select.innerHTML = staticOptions;
             dates.forEach(d => {
-                if(!select.querySelector(`option[value="${d}"]`)) {
-                    select.innerHTML += `<option value="${d}">${d}</option>`;
-                }
+                select.innerHTML += `<option value="${d}">${d}</option>`;
             });
         }
 
@@ -109,10 +110,12 @@
             let filtered = allLogs.filter(log => {
                 const matchDate = dateQ === 'today' ? log.created_at.startsWith(today) : 
                                   dateQ === 'all' ? true : log.created_at.startsWith(dateQ);
+                
                 const matchType = activeStatFilter === 'errors' ? ['System Error', 'Link Down'].includes(log.log_type) :
                                   activeStatFilter === 'connect' ? log.log_type === 'PPP Connect' :
                                   activeStatFilter === 'disconnect' ? log.log_type === 'PPP Disconnect' :
                                   (typeQ ? log.log_type === typeQ : true);
+                                  
                 return matchDate && matchType && log.username?.toLowerCase().includes(userQ);
             });
 
