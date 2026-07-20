@@ -2,103 +2,97 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>إبداع نت | لوحة التحكم </title>
+    <title>إبداع نت | لوحة تحكم متقدمة</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background: #050505; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background: #050505; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; }
         .glass { background: rgba(20, 20, 20, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
-        .row-anim { transition: all 0.4s ease; }
-        .row-anim:hover { background: rgba(59, 130, 246, 0.1); transform: scale(1.01); }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .sidebar { border-left: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
-<body class="p-4 md:p-10">
+<body class="flex min-h-screen">
 
-    <div class="max-w-6xl mx-auto">
-        <!-- Header -->
-        <div class="flex justify-between items-end mb-8 border-b border-white/10 pb-6">
-            <div>
-                <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">لوحة تحكم إبداع نت</h1>
-                <p class="text-slate-500 mt-2">نظام مراقبة الشبكة - إصدار الأداء العالي</p>
-            </div>
-            <div id="status-badge" class="px-4 py-1 rounded-full text-xs bg-emerald-900/30 text-emerald-500 border border-emerald-500/20">متصل</div>
+    <!-- Sidebar (الفلاتر الجانبية) -->
+    <aside class="w-72 p-6 sidebar glass">
+        <h2 class="text-xl font-bold mb-8 text-blue-400">أدوات التصفية</h2>
+        <div id="filters-container" class="space-y-6">
+            <!-- الفلاتر ستظهر هنا ديناميكياً -->
         </div>
+        <button onclick="clearAll()" class="w-full mt-10 bg-red-900/30 text-red-500 py-3 rounded-xl border border-red-500/30 hover:bg-red-900 transition-all">مسح الفلاتر</button>
+    </aside>
 
-        <!-- Filters Section -->
-        <div class="glass p-6 rounded-3xl mb-8 flex flex-wrap gap-4 items-center shadow-2xl">
-            <input id="search-bar" oninput="applyFilters()" placeholder="🔎 البحث بالاسم..." class="flex-1 bg-black/40 border border-white/10 rounded-2xl p-4 outline-none focus:ring-2 focus:ring-blue-500 transition-all">
-            <select id="type-select" onchange="applyFilters()" class="bg-black/40 border border-white/10 rounded-2xl p-4 outline-none w-40">
-                <option value="">كل الأنواع</option>
-            </select>
-            <button onclick="clearFilters()" class="bg-blue-600 hover:bg-blue-500 px-6 py-4 rounded-2xl font-bold transition-all">مسح الفلاتر</button>
-        </div>
+    <!-- Main Content -->
+    <main class="flex-1 p-8">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold">سجلات الشبكة</h1>
+        </header>
 
-        <!-- Table Container -->
-        <div class="glass rounded-3xl overflow-hidden p-1 shadow-2xl">
-            <table class="w-full">
-                <thead class="text-slate-400 text-sm">
-                    <tr class="border-b border-white/5">
-                        <th class="p-5 text-right">الوقت</th>
-                        <th class="p-5 text-right">النوع</th>
-                        <th class="p-5 text-right">المستخدم</th>
-                    </tr>
+        <div class="glass rounded-3xl overflow-hidden shadow-2xl">
+            <table class="w-full text-right" id="data-table">
+                <thead class="bg-white/5 text-slate-400 text-sm">
+                    <tr id="table-head"></tr>
                 </thead>
-                <tbody id="logs-tbody" class="custom-scrollbar">
-                    <!-- Data will be injected here -->
-                </tbody>
+                <tbody id="table-body"></tbody>
             </table>
         </div>
-    </div>
+    </main>
 
     <script>
-        // ضع قيمك هنا
         const URL = "https://iuokwfigwuebutctaxli.supabase.co";
         const KEY = "sb_publishable_BWoVwRtLPrIXzUNqembCtA_P7To3GW-";
-        
         const supabase = supabase.createClient(URL, KEY);
+        
         let allData = [];
+        const columns = ['log_type', 'username', 'message']; // أعمدة جدولك
 
         async function init() {
-            try {
-                const { data, error } = await supabase.from('network_logs').select('*').order('created_at', { ascending: false });
-                if (error) throw error;
-                allData = data;
-                
-                // إضافة الأنواع للفيلتر
-                const types = [...new Set(data.map(l => l.log_type))];
-                const select = document.getElementById('type-select');
-                types.forEach(t => select.innerHTML += `<option value="${t}">${t}</option>`);
-                
-                render(data);
-            } catch (e) {
-                document.getElementById('status-badge').className = "px-4 py-1 rounded-full text-xs bg-red-900/30 text-red-500 border border-red-500/20";
-                document.getElementById('status-badge').innerText = "خطأ في الاتصال: " + e.message;
-            }
+            const { data } = await supabase.from('network_logs').select('*');
+            allData = data || [];
+            createFilters();
+            renderTable(allData);
         }
 
-        function render(data) {
-            const tbody = document.getElementById('logs-tbody');
-            tbody.innerHTML = data.map(l => `
-                <tr class="row-anim border-b border-white/5">
-                    <td class="p-5 text-slate-400">${l.created_at.substring(11,16)}</td>
-                    <td class="p-5 font-bold">${l.log_type}</td>
-                    <td class="p-5 text-blue-400 font-mono">${l.username}</td>
+        function createFilters() {
+            const container = document.getElementById('filters-container');
+            columns.forEach(col => {
+                const uniqueValues = [...new Set(allData.map(item => item[col]))];
+                container.innerHTML += `
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-2 uppercase">${col}</label>
+                        <select onchange="applyFilters()" data-col="${col}" class="filter-input w-full bg-black/40 border border-white/10 p-3 rounded-xl outline-none">
+                            <option value="">الكل</option>
+                            ${uniqueValues.map(v => `<option value="${v}">${v}</option>`).join('')}
+                        </select>
+                    </div>
+                `;
+            });
+            // إضافة رأس الجدول ديناميكياً
+            document.getElementById('table-head').innerHTML = columns.map(c => `<th class="p-5">${c.toUpperCase()}</th>`).join('');
+        }
+
+        function applyFilters() {
+            const filters = document.querySelectorAll('.filter-input');
+            const filtered = allData.filter(item => {
+                return Array.from(filters).every(f => {
+                    const col = f.getAttribute('data-col');
+                    return f.value === "" || item[col] == f.value;
+                });
+            });
+            renderTable(filtered);
+        }
+
+        function renderTable(data) {
+            document.getElementById('table-body').innerHTML = data.map(item => `
+                <tr class="border-b border-white/5 hover:bg-white/5 transition-all">
+                    ${columns.map(c => `<td class="p-5 text-sm">${item[c]}</td>`).join('')}
                 </tr>
             `).join('');
         }
 
-        function applyFilters() {
-            const s = document.getElementById('search-bar').value.toLowerCase();
-            const t = document.getElementById('type-select').value;
-            render(allData.filter(l => l.username.toLowerCase().includes(s) && (t === "" || l.log_type === t)));
-        }
-
-        function clearFilters() {
-            document.getElementById('search-bar').value = "";
-            document.getElementById('type-select').value = "";
-            render(allData);
+        function clearAll() {
+            document.querySelectorAll('.filter-input').forEach(f => f.value = "");
+            renderTable(allData);
         }
 
         init();
