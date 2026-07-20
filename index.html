@@ -18,23 +18,31 @@
 
     <div class="max-w-7xl mx-auto">
         <!-- Dashboard Header -->
-        <header class="mb-10">
-            <h1 class="text-4xl font-bold text-white mb-2">لوحة تحكم إبداع نت</h1>
-            <p class="text-slate-400">مركز المراقبة الذكي للشبكة</p>
+        <header class="mb-10 flex justify-between items-center">
+            <div>
+                <h1 class="text-4xl font-bold text-white mb-2">لوحة تحكم إبداع نت</h1>
+                <p class="text-slate-400">مركز المراقبة الذكي للشبكة</p>
+            </div>
+            <div id="live-indicator" class="flex items-center gap-2 text-emerald-400 text-sm bg-emerald-400/10 px-3 py-1 rounded-full">
+                <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                مراقبة حية
+            </div>
         </header>
 
         <!-- Stats Section -->
         <h2 class="text-xl font-bold mb-4 text-blue-400">📊 ملخص الأداء</h2>
-        <section class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8" id="stats-container"></section>
+        <section class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8" id="stats-container">
+            <div class="glass p-5 rounded-2xl">جاري تحميل البيانات...</div>
+        </section>
 
         <!-- Charts & Filters Section -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
             <div class="lg:col-span-1 glass p-6 rounded-2xl">
-                <h3 class="font-bold mb-4">توزيع أنواع السجلات</h3>
+                <h3 class="font-bold mb-4 text-slate-300">توزيع أنواع السجلات</h3>
                 <canvas id="myChart" height="200"></canvas>
             </div>
             <div class="lg:col-span-2 glass p-6 rounded-2xl">
-                <h3 class="font-bold mb-4">🛠 أدوات التصفية</h3>
+                <h3 class="font-bold mb-4 text-slate-300">🛠 أدوات التصفية</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <input id="search" oninput="applyFilters()" placeholder="بحث باسم المستخدم..." class="bg-slate-950 border border-slate-800 rounded-xl p-3 outline-none focus:border-blue-500">
                     <select id="type-filter" onchange="applyFilters()" class="bg-slate-950 border border-slate-800 rounded-xl p-3 outline-none">
@@ -50,8 +58,8 @@
 
         <!-- Logs Table Section -->
         <h2 class="text-xl font-bold mb-4 text-emerald-400">📋 سجل العمليات</h2>
-        <div class="glass rounded-2xl overflow-hidden">
-            <table class="w-full text-right">
+        <div class="glass rounded-2xl overflow-hidden shadow-xl">
+            <table class="w-full text-right border-collapse">
                 <thead class="bg-slate-900/50 text-slate-400 text-xs uppercase">
                     <tr><th class="p-4">الوقت</th><th class="p-4">النوع</th><th class="p-4">المستخدم</th><th class="p-4">الرسالة</th></tr>
                 </thead>
@@ -69,6 +77,7 @@
     <script>
         const SUPABASE_URL = "https://iuokwfigwuebutctaxli.supabase.co";
         const SUPABASE_KEY = "sb_publishable_BWoVwRtLPrIXzUNqembCtA_P7To3GW-";
+        
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let allLogs = [];
         let myChart;
@@ -76,10 +85,19 @@
         async function fetchData() {
             const { data } = await supabase.from('network_logs').select('*').order('created_at', { ascending: false });
             allLogs = data || [];
-            const types = [...new Set(allLogs.map(l => l.log_type))];
-            types.forEach(t => document.getElementById('type-filter').innerHTML += `<option value="${t}">${t}</option>`);
+            
+            // تحديث القائمة المنسدلة فقط إذا كانت فارغة
+            const typeFilter = document.getElementById('type-filter');
+            if(typeFilter.options.length <= 1) {
+                const types = [...new Set(allLogs.map(l => l.log_type))];
+                types.forEach(t => typeFilter.innerHTML += `<option value="${t}">${t}</option>`);
+            }
+            
             applyFilters();
         }
+
+        // تحديث البيانات تلقائياً كل 30 ثانية
+        setInterval(fetchData, 30000);
 
         function updateChart(data) {
             const ctx = document.getElementById('myChart').getContext('2d');
@@ -97,7 +115,7 @@
                     labels: ['اتصال', 'قطع', 'أخطاء'],
                     datasets: [{ data: [counts.Connect, counts.Disconnect, counts.Error], backgroundColor: ['#10b981', '#f59e0b', '#ef4444'] }]
                 },
-                options: { plugins: { legend: { position: 'bottom', labels: { color: '#fff' } } } }
+                options: { plugins: { legend: { position: 'bottom', labels: { color: '#cbd5e1' } } } }
             });
         }
 
@@ -120,9 +138,9 @@
 
         function renderTable(data) {
             document.getElementById('logs-tbody').innerHTML = data.map(l => `
-                <tr class="hover:bg-slate-800/50 cursor-pointer" onclick="showUser('${l.username}')">
+                <tr class="hover:bg-slate-800/50 cursor-pointer transition" onclick="showUser('${l.username}')">
                     <td class="p-4 text-xs text-slate-500">${l.created_at.substring(11,16)}</td>
-                    <td class="p-4 text-sm">${l.log_type}</td>
+                    <td class="p-4 text-sm font-semibold">${l.log_type}</td>
                     <td class="p-4 font-bold text-blue-400">${l.username}</td>
                     <td class="p-4 text-slate-300 text-sm truncate max-w-xs">${l.message}</td>
                 </tr>
@@ -137,8 +155,8 @@
                 { title: 'الإجمالي', val: data.length, color: 'blue' }
             ];
             document.getElementById('stats-container').innerHTML = stats.map(s => `
-                <div class="glass p-5 rounded-2xl border-b-4 border-${s.color}-500 transition-all hover:scale-105">
-                    <div class="text-slate-400 text-xs">${s.title}</div>
+                <div class="glass p-5 rounded-2xl border-b-4 border-${s.color}-500 hover:scale-105 transition-all">
+                    <div class="text-slate-400 text-xs mb-1">${s.title}</div>
                     <div class="text-2xl font-bold text-${s.color}-400">${s.val}</div>
                 </div>
             `).join('');
@@ -147,12 +165,12 @@
         function showUser(username) {
             const userLogs = allLogs.filter(l => l.username === username);
             document.getElementById('drawer-content').innerHTML = `
-                <h2 class="text-xl font-bold mb-6 text-blue-400">سجل نشاط: ${username}</h2>
+                <h2 class="text-xl font-bold mb-6 text-blue-400 border-r-4 border-blue-500 pr-3">سجل: ${username}</h2>
                 <div class="space-y-4">
                     ${userLogs.map(l => `
-                        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-sm">
                             <div class="text-slate-500 text-xs mb-1">${l.created_at.replace('T', ' ').substring(0,16)}</div>
-                            <div class="font-bold text-sm">${l.log_type}</div>
+                            <div class="font-bold text-sm text-slate-200">${l.log_type}</div>
                             <div class="text-xs text-slate-400 mt-1">${l.message}</div>
                         </div>
                     `).join('')}
