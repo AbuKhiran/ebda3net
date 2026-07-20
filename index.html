@@ -3,72 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم شبكة ابداع نت</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>لوحة تحكم ابداع نت | الإدارة الذكية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
-        body { font-family: 'Cairo', sans-serif; }
+        body { font-family: 'Cairo', sans-serif; background-color: #0f172a; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen p-4 md:p-8">
+<body class="text-gray-100 min-h-screen p-4 md:p-8">
 
-    <!-- Dashboard Content -->
-    <div id="dashboard-content" class="w-full max-w-7xl mx-auto">
-        
-        <!-- Stats Cards Section -->
-        <section class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div onclick="clickStatFilter('connect')" id="box-connect" class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 cursor-pointer hover:border-emerald-500/40 transition-all">
-                <div class="flex justify-between">
-                    <div class="text-gray-400 text-sm">عدد المتصلين</div>
-                    <button onclick="clearBoxFilter(event)" id="btn-x-connect" class="hidden text-emerald-400 font-bold">✕</button>
-                </div>
-                <div id="stat-connects" class="text-3xl font-bold text-emerald-400 mt-2">0</div>
-            </div>
-            
-            <div onclick="clickStatFilter('disconnect')" id="box-disconnect" class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 cursor-pointer hover:border-amber-500/40 transition-all">
-                <div class="flex justify-between">
-                    <div class="text-gray-400 text-sm">قطع الاتصال</div>
-                    <button onclick="clearBoxFilter(event)" id="btn-x-disconnect" class="hidden text-amber-400 font-bold">✕</button>
-                </div>
-                <div id="stat-disconnects" class="text-3xl font-bold text-amber-400 mt-2">0</div>
-            </div>
+    <div class="max-w-7xl mx-auto">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-white">لوحة تحكم إبداع نت</h1>
+            <p class="text-gray-400">مراقبة لحظية لبيانات الشبكة</p>
+        </header>
 
-            <div id="box-top-user" class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50">
-                <div class="text-gray-400 text-sm">الأكثر فصلاً</div>
-                <div id="stat-top-disconnect" class="text-xl font-bold text-red-400 mt-2 truncate">---</div>
-            </div>
-
-            <div onclick="clickStatFilter('errors')" id="box-errors" class="bg-gray-800 p-5 rounded-2xl border border-gray-700/50 cursor-pointer hover:border-rose-500/40 transition-all">
-                <div class="flex justify-between">
-                    <div class="text-gray-400 text-sm">أخطاء النظام</div>
-                    <button onclick="clearBoxFilter(event)" id="btn-x-errors" class="hidden text-rose-400 font-bold">✕</button>
-                </div>
-                <div id="stat-errors" class="text-3xl font-bold text-rose-500 mt-2">0</div>
-            </div>
+        <!-- Stats -->
+        <section class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8" id="stats-container">
+            <!-- سيتم ملؤها بواسطة JavaScript -->
         </section>
 
-        <!-- Filter Section -->
-        <section class="bg-gray-800 p-4 rounded-2xl border border-gray-700/50 mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <input id="filter-user" oninput="applyFilters()" placeholder="بحث باسم المستخدم..." class="bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm">
-            <select id="filter-type" onchange="applyFilters()" class="bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm">
+        <!-- Filters -->
+        <section class="glass p-4 rounded-2xl mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <input id="filter-user" oninput="applyFilters()" placeholder="بحث باسم المستخدم..." class="bg-slate-950 border border-slate-700 rounded-xl p-3 outline-none focus:border-blue-500">
+            <select id="filter-type" onchange="applyFilters()" class="bg-slate-950 border border-slate-700 rounded-xl p-3 outline-none">
                 <option value="">كل الأنواع</option>
+                <option value="PPP Connect">اتصال (Connect)</option>
+                <option value="PPP Disconnect">قطع (Disconnect)</option>
+                <option value="System Error">أخطاء (Errors)</option>
             </select>
-            <select id="filter-date" onchange="applyFilters()" class="bg-gray-900 border border-gray-700 rounded-lg p-2 text-sm">
+            <select id="filter-date" onchange="applyFilters()" class="bg-slate-950 border border-slate-700 rounded-xl p-3 outline-none">
                 <option value="today">اليوم فقط</option>
                 <option value="all">كل التواريخ</option>
             </select>
         </section>
 
         <!-- Table -->
-        <main class="bg-gray-800 rounded-2xl border border-gray-700/50 overflow-hidden">
-            <table class="w-full text-right">
-                <thead class="bg-gray-950/60 text-gray-400 text-xs">
+        <div class="glass rounded-2xl overflow-hidden">
+            <table class="w-full text-right border-collapse">
+                <thead class="bg-slate-950/50 text-gray-400 text-xs uppercase tracking-wider">
                     <tr><th class="p-4">التاريخ</th><th class="p-4">النوع</th><th class="p-4">المستخدم</th><th class="p-4">الرسالة</th></tr>
                 </thead>
-                <tbody id="logs-tbody" class="text-sm divide-y divide-gray-700/40"></tbody>
+                <tbody id="logs-tbody" class="divide-y divide-slate-700/50">
+                    <tr><td colspan="4" class="p-8 text-center text-gray-500">جاري تحميل البيانات...</td></tr>
+                </tbody>
             </table>
-        </main>
+        </div>
     </div>
 
     <script>
@@ -76,31 +58,43 @@
         const SUPABASE_KEY = "sb_publishable_BWoVwRtLPrIXzUNqembCtA_P7To3GW-";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let allLogs = [];
-        let activeStatFilter = null;
 
         async function fetchData() {
-            const { data } = await supabaseClient
-                .from('network_logs')
-                .select('*')
-                .order('created_at', { ascending: false });
-            
+            const { data } = await supabaseClient.from('network_logs').select('*').order('created_at', { ascending: false });
             allLogs = data || [];
             updateDateFilter();
             applyFilters();
         }
 
+        function updateStats() {
+            const connects = allLogs.filter(l => l.log_type === 'PPP Connect').length;
+            const disconnects = allLogs.filter(l => l.log_type === 'PPP Disconnect');
+            const errors = allLogs.filter(l => l.log_type === 'System Error' || l.log_type === 'Link Down').length;
+            
+            // حساب الأكثر فصلاً
+            const counts = {};
+            disconnects.forEach(d => counts[d.username] = (counts[d.username] || 0) + 1);
+            const topUser = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b, '---');
+
+            document.getElementById('stats-container').innerHTML = `
+                ${statBox('المتصلين', connects, 'text-emerald-400')}
+                ${statBox('قطع الاتصال', disconnects.length, 'text-amber-400')}
+                ${statBox('الأكثر فصلاً', topUser, 'text-red-400', 'text-lg')}
+                ${statBox('أخطاء النظام', errors, 'text-rose-500')}
+            `;
+        }
+
+        function statBox(title, val, color, size='text-3xl') {
+            return `<div class="glass p-5 rounded-2xl">
+                <div class="text-gray-400 text-sm">${title}</div>
+                <div class="${size} font-bold ${color} mt-2">${val}</div>
+            </div>`;
+        }
+
         function updateDateFilter() {
             const select = document.getElementById('filter-date');
-            // الحفاظ على الخيارات الثابتة
-            const staticOptions = `<option value="today">اليوم فقط</option><option value="all">كل التواريخ</option>`;
-            
-            // استخراج التواريخ الفريدة فقط
             const dates = [...new Set(allLogs.map(l => l.created_at.split('T')[0]))].sort().reverse();
-            
-            select.innerHTML = staticOptions;
-            dates.forEach(d => {
-                select.innerHTML += `<option value="${d}">${d}</option>`;
-            });
+            dates.forEach(d => select.innerHTML += `<option value="${d}">${d}</option>`);
         }
 
         function applyFilters() {
@@ -109,27 +103,25 @@
             const dateQ = document.getElementById('filter-date').value;
             const today = new Date().toISOString().split('T')[0];
 
-            let filtered = allLogs.filter(log => {
-                const matchDate = dateQ === 'today' ? log.created_at.startsWith(today) : 
-                                  dateQ === 'all' ? true : log.created_at.startsWith(dateQ);
-                
-                const matchType = activeStatFilter === 'errors' ? ['System Error', 'Link Down'].includes(log.log_type) :
-                                  activeStatFilter === 'connect' ? log.log_type === 'PPP Connect' :
-                                  activeStatFilter === 'disconnect' ? log.log_type === 'PPP Disconnect' :
-                                  (typeQ ? log.log_type === typeQ : true);
-                                  
-                return matchDate && matchType && log.username?.toLowerCase().includes(userQ);
+            const filtered = allLogs.filter(log => {
+                const matchDate = dateQ === 'today' ? log.created_at.startsWith(today) : (dateQ === 'all' ? true : log.created_at.startsWith(dateQ));
+                const matchType = typeQ ? log.log_type === typeQ : true;
+                return matchDate && matchType && (log.username?.toLowerCase().includes(userQ) || '');
             });
 
             render(filtered);
+            updateStats();
         }
 
-        function clickStatFilter(mode) { activeStatFilter = mode; applyFilters(); }
-        function clearBoxFilter(e) { e.stopPropagation(); activeStatFilter = null; applyFilters(); }
-
         function render(data) {
-            document.getElementById('logs-tbody').innerHTML = data.map(log => `
-                <tr><td class="p-3">${log.created_at.split('T')[0]}</td><td class="p-3">${log.log_type}</td><td class="p-3">${log.username}</td><td class="p-3">${log.message}</td></tr>
+            const tbody = document.getElementById('logs-tbody');
+            tbody.innerHTML = data.map(log => `
+                <tr class="hover:bg-slate-700/20 transition">
+                    <td class="p-4 text-xs text-gray-400">${log.created_at.split('T')[1].substring(0,5)}</td>
+                    <td class="p-4 font-semibold">${log.log_type}</td>
+                    <td class="p-4 text-blue-400">${log.username}</td>
+                    <td class="p-4 text-gray-300 text-sm">${log.message}</td>
+                </tr>
             `).join('');
         }
 
