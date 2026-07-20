@@ -1,129 +1,167 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" id="html-root">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم ابداع نت | الإدارة الذكية</title>
+    <title>إبداع نت | لوحة التحكم الإدارية</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #0f172a; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        body { font-family: 'Cairo', sans-serif; background: #020617; color: #f1f5f9; }
+        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
+        .drawer { transform: translateX(100%); transition: transform 0.3s ease-in-out; }
+        .drawer.open { transform: translateX(0); }
     </style>
 </head>
-<body class="text-gray-100 min-h-screen p-4 md:p-8">
+<body class="p-4 md:p-8">
 
     <div class="max-w-7xl mx-auto">
-        <header class="mb-8">
-            <h1 class="text-3xl font-bold text-white">لوحة تحكم إبداع نت</h1>
-            <p class="text-gray-400">مراقبة لحظية لبيانات الشبكة</p>
+        <!-- Dashboard Header -->
+        <header class="mb-10">
+            <h1 class="text-4xl font-bold text-white mb-2">لوحة تحكم إبداع نت</h1>
+            <p class="text-slate-400">مركز المراقبة الذكي للشبكة</p>
         </header>
 
-        <!-- Stats -->
-        <section class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8" id="stats-container">
-            <!-- سيتم ملؤها بواسطة JavaScript -->
-        </section>
+        <!-- Stats Section -->
+        <h2 class="text-xl font-bold mb-4 text-blue-400">📊 ملخص الأداء</h2>
+        <section class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8" id="stats-container"></section>
 
-        <!-- Filters -->
-        <section class="glass p-4 rounded-2xl mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <input id="filter-user" oninput="applyFilters()" placeholder="بحث باسم المستخدم..." class="bg-slate-950 border border-slate-700 rounded-xl p-3 outline-none focus:border-blue-500">
-            <select id="filter-type" onchange="applyFilters()" class="bg-slate-950 border border-slate-700 rounded-xl p-3 outline-none">
-                <option value="">كل الأنواع</option>
-                <option value="PPP Connect">اتصال (Connect)</option>
-                <option value="PPP Disconnect">قطع (Disconnect)</option>
-                <option value="System Error">أخطاء (Errors)</option>
-            </select>
-            <select id="filter-date" onchange="applyFilters()" class="bg-slate-950 border border-slate-700 rounded-xl p-3 outline-none">
-                <option value="today">اليوم فقط</option>
-                <option value="all">كل التواريخ</option>
-            </select>
-        </section>
+        <!-- Charts & Filters Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            <div class="lg:col-span-1 glass p-6 rounded-2xl">
+                <h3 class="font-bold mb-4">توزيع أنواع السجلات</h3>
+                <canvas id="myChart" height="200"></canvas>
+            </div>
+            <div class="lg:col-span-2 glass p-6 rounded-2xl">
+                <h3 class="font-bold mb-4">🛠 أدوات التصفية</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <input id="search" oninput="applyFilters()" placeholder="بحث باسم المستخدم..." class="bg-slate-950 border border-slate-800 rounded-xl p-3 outline-none focus:border-blue-500">
+                    <select id="type-filter" onchange="applyFilters()" class="bg-slate-950 border border-slate-800 rounded-xl p-3 outline-none">
+                        <option value="">جميع الأنواع</option>
+                    </select>
+                    <select id="date-filter" onchange="applyFilters()" class="bg-slate-950 border border-slate-800 rounded-xl p-3 outline-none">
+                        <option value="today">اليوم فقط</option>
+                        <option value="all">كل التواريخ</option>
+                    </select>
+                </div>
+            </div>
+        </div>
 
-        <!-- Table -->
+        <!-- Logs Table Section -->
+        <h2 class="text-xl font-bold mb-4 text-emerald-400">📋 سجل العمليات</h2>
         <div class="glass rounded-2xl overflow-hidden">
-            <table class="w-full text-right border-collapse">
-                <thead class="bg-slate-950/50 text-gray-400 text-xs uppercase tracking-wider">
-                    <tr><th class="p-4">التاريخ</th><th class="p-4">النوع</th><th class="p-4">المستخدم</th><th class="p-4">الرسالة</th></tr>
+            <table class="w-full text-right">
+                <thead class="bg-slate-900/50 text-slate-400 text-xs uppercase">
+                    <tr><th class="p-4">الوقت</th><th class="p-4">النوع</th><th class="p-4">المستخدم</th><th class="p-4">الرسالة</th></tr>
                 </thead>
-                <tbody id="logs-tbody" class="divide-y divide-slate-700/50">
-                    <tr><td colspan="4" class="p-8 text-center text-gray-500">جاري تحميل البيانات...</td></tr>
-                </tbody>
+                <tbody id="logs-tbody" class="divide-y divide-slate-800"></tbody>
             </table>
         </div>
+    </div>
+
+    <!-- Side Drawer -->
+    <div id="drawer" class="fixed top-0 right-0 w-full md:w-96 h-full glass shadow-2xl p-6 z-50 drawer">
+        <button onclick="closeDrawer()" class="text-slate-400 mb-4 hover:text-white">✕ إغلاق</button>
+        <div id="drawer-content"></div>
     </div>
 
     <script>
         const SUPABASE_URL = "https://iuokwfigwuebutctaxli.supabase.co";
         const SUPABASE_KEY = "sb_publishable_BWoVwRtLPrIXzUNqembCtA_P7To3GW-";
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let allLogs = [];
+        let myChart;
 
         async function fetchData() {
-            const { data } = await supabaseClient.from('network_logs').select('*').order('created_at', { ascending: false });
+            const { data } = await supabase.from('network_logs').select('*').order('created_at', { ascending: false });
             allLogs = data || [];
-            updateDateFilter();
+            const types = [...new Set(allLogs.map(l => l.log_type))];
+            types.forEach(t => document.getElementById('type-filter').innerHTML += `<option value="${t}">${t}</option>`);
             applyFilters();
         }
 
-        function updateStats() {
-            const connects = allLogs.filter(l => l.log_type === 'PPP Connect').length;
-            const disconnects = allLogs.filter(l => l.log_type === 'PPP Disconnect');
-            const errors = allLogs.filter(l => l.log_type === 'System Error' || l.log_type === 'Link Down').length;
-            
-            // حساب الأكثر فصلاً
-            const counts = {};
-            disconnects.forEach(d => counts[d.username] = (counts[d.username] || 0) + 1);
-            const topUser = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b, '---');
+        function updateChart(data) {
+            const ctx = document.getElementById('myChart').getContext('2d');
+            const counts = { 'Connect': 0, 'Disconnect': 0, 'Error': 0 };
+            data.forEach(l => {
+                if(l.log_type.includes('Connect')) counts.Connect++;
+                else if(l.log_type.includes('Disconnect')) counts.Disconnect++;
+                else counts.Error++;
+            });
 
-            document.getElementById('stats-container').innerHTML = `
-                ${statBox('المتصلين', connects, 'text-emerald-400')}
-                ${statBox('قطع الاتصال', disconnects.length, 'text-amber-400')}
-                ${statBox('الأكثر فصلاً', topUser, 'text-red-400', 'text-lg')}
-                ${statBox('أخطاء النظام', errors, 'text-rose-500')}
-            `;
-        }
-
-        function statBox(title, val, color, size='text-3xl') {
-            return `<div class="glass p-5 rounded-2xl">
-                <div class="text-gray-400 text-sm">${title}</div>
-                <div class="${size} font-bold ${color} mt-2">${val}</div>
-            </div>`;
-        }
-
-        function updateDateFilter() {
-            const select = document.getElementById('filter-date');
-            const dates = [...new Set(allLogs.map(l => l.created_at.split('T')[0]))].sort().reverse();
-            dates.forEach(d => select.innerHTML += `<option value="${d}">${d}</option>`);
+            if(myChart) myChart.destroy();
+            myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['اتصال', 'قطع', 'أخطاء'],
+                    datasets: [{ data: [counts.Connect, counts.Disconnect, counts.Error], backgroundColor: ['#10b981', '#f59e0b', '#ef4444'] }]
+                },
+                options: { plugins: { legend: { position: 'bottom', labels: { color: '#fff' } } } }
+            });
         }
 
         function applyFilters() {
-            const userQ = document.getElementById('filter-user').value.toLowerCase();
-            const typeQ = document.getElementById('filter-type').value;
-            const dateQ = document.getElementById('filter-date').value;
+            const userQ = document.getElementById('search').value.toLowerCase();
+            const typeQ = document.getElementById('type-filter').value;
+            const dateQ = document.getElementById('date-filter').value;
             const today = new Date().toISOString().split('T')[0];
 
-            const filtered = allLogs.filter(log => {
-                const matchDate = dateQ === 'today' ? log.created_at.startsWith(today) : (dateQ === 'all' ? true : log.created_at.startsWith(dateQ));
-                const matchType = typeQ ? log.log_type === typeQ : true;
-                return matchDate && matchType && (log.username?.toLowerCase().includes(userQ) || '');
+            const filtered = allLogs.filter(l => {
+                const matchDate = dateQ === 'today' ? l.created_at.startsWith(today) : (dateQ === 'all' ? true : l.created_at.startsWith(dateQ));
+                const matchType = typeQ ? l.log_type === typeQ : true;
+                return matchDate && matchType && l.username.toLowerCase().includes(userQ);
             });
 
-            render(filtered);
-            updateStats();
+            renderTable(filtered);
+            updateStats(filtered);
+            updateChart(filtered);
         }
 
-        function render(data) {
-            const tbody = document.getElementById('logs-tbody');
-            tbody.innerHTML = data.map(log => `
-                <tr class="hover:bg-slate-700/20 transition">
-                    <td class="p-4 text-xs text-gray-400">${log.created_at.split('T')[1].substring(0,5)}</td>
-                    <td class="p-4 font-semibold">${log.log_type}</td>
-                    <td class="p-4 text-blue-400">${log.username}</td>
-                    <td class="p-4 text-gray-300 text-sm">${log.message}</td>
+        function renderTable(data) {
+            document.getElementById('logs-tbody').innerHTML = data.map(l => `
+                <tr class="hover:bg-slate-800/50 cursor-pointer" onclick="showUser('${l.username}')">
+                    <td class="p-4 text-xs text-slate-500">${l.created_at.substring(11,16)}</td>
+                    <td class="p-4 text-sm">${l.log_type}</td>
+                    <td class="p-4 font-bold text-blue-400">${l.username}</td>
+                    <td class="p-4 text-slate-300 text-sm truncate max-w-xs">${l.message}</td>
                 </tr>
             `).join('');
         }
+
+        function updateStats(data) {
+            const stats = [
+                { title: 'المتصلين', val: data.filter(l => l.log_type.includes('Connect')).length, color: 'emerald' },
+                { title: 'قطع الاتصال', val: data.filter(l => l.log_type.includes('Disconnect')).length, color: 'amber' },
+                { title: 'الأخطاء', val: data.filter(l => l.log_type.includes('Error')).length, color: 'rose' },
+                { title: 'الإجمالي', val: data.length, color: 'blue' }
+            ];
+            document.getElementById('stats-container').innerHTML = stats.map(s => `
+                <div class="glass p-5 rounded-2xl border-b-4 border-${s.color}-500 transition-all hover:scale-105">
+                    <div class="text-slate-400 text-xs">${s.title}</div>
+                    <div class="text-2xl font-bold text-${s.color}-400">${s.val}</div>
+                </div>
+            `).join('');
+        }
+
+        function showUser(username) {
+            const userLogs = allLogs.filter(l => l.username === username);
+            document.getElementById('drawer-content').innerHTML = `
+                <h2 class="text-xl font-bold mb-6 text-blue-400">سجل نشاط: ${username}</h2>
+                <div class="space-y-4">
+                    ${userLogs.map(l => `
+                        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                            <div class="text-slate-500 text-xs mb-1">${l.created_at.replace('T', ' ').substring(0,16)}</div>
+                            <div class="font-bold text-sm">${l.log_type}</div>
+                            <div class="text-xs text-slate-400 mt-1">${l.message}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            document.getElementById('drawer').classList.add('open');
+        }
+
+        function closeDrawer() { document.getElementById('drawer').classList.remove('open'); }
 
         fetchData();
     </script>
