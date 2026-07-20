@@ -2,82 +2,103 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>إبداع نت | لوحة التحكم</title>
+    <title>إبداع نت | لوحة التحكم </title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { background: #020617; color: #f1f5f9; font-family: sans-serif; }
-        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
+        body { background: #050505; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        .glass { background: rgba(20, 20, 20, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
+        .row-anim { transition: all 0.4s ease; }
+        .row-anim:hover { background: rgba(59, 130, 246, 0.1); transform: scale(1.01); }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
     </style>
 </head>
-<body class="p-4">
+<body class="p-4 md:p-10">
 
-    <!-- لوحة عرض الأخطاء -->
-    <div id="error-display" class="hidden bg-red-600 text-white p-4 rounded-xl mb-4 text-center font-bold"></div>
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <div class="flex justify-between items-end mb-8 border-b border-white/10 pb-6">
+            <div>
+                <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">لوحة تحكم إبداع نت</h1>
+                <p class="text-slate-500 mt-2">نظام مراقبة الشبكة - إصدار الأداء العالي</p>
+            </div>
+            <div id="status-badge" class="px-4 py-1 rounded-full text-xs bg-emerald-900/30 text-emerald-500 border border-emerald-500/20">متصل</div>
+        </div>
 
-    <div class="max-w-7xl mx-auto">
-        <h1 class="text-2xl font-bold mb-4">لوحة تحكم إبداع نت</h1>
-        
-        <!-- ملخص -->
-        <div id="stats-container" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
+        <!-- Filters Section -->
+        <div class="glass p-6 rounded-3xl mb-8 flex flex-wrap gap-4 items-center shadow-2xl">
+            <input id="search-bar" oninput="applyFilters()" placeholder="🔎 البحث بالاسم..." class="flex-1 bg-black/40 border border-white/10 rounded-2xl p-4 outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+            <select id="type-select" onchange="applyFilters()" class="bg-black/40 border border-white/10 rounded-2xl p-4 outline-none w-40">
+                <option value="">كل الأنواع</option>
+            </select>
+            <button onclick="clearFilters()" class="bg-blue-600 hover:bg-blue-500 px-6 py-4 rounded-2xl font-bold transition-all">مسح الفلاتر</button>
+        </div>
 
-        <!-- الجدول -->
-        <div class="glass rounded-2xl overflow-hidden">
-            <table class="w-full text-right">
-                <thead class="bg-slate-900 text-slate-400 text-xs">
-                    <tr><th class="p-4">الوقت</th><th class="p-4">النوع</th><th class="p-4">المستخدم</th></tr>
+        <!-- Table Container -->
+        <div class="glass rounded-3xl overflow-hidden p-1 shadow-2xl">
+            <table class="w-full">
+                <thead class="text-slate-400 text-sm">
+                    <tr class="border-b border-white/5">
+                        <th class="p-5 text-right">الوقت</th>
+                        <th class="p-5 text-right">النوع</th>
+                        <th class="p-5 text-right">المستخدم</th>
+                    </tr>
                 </thead>
-                <tbody id="logs-tbody"></tbody>
+                <tbody id="logs-tbody" class="custom-scrollbar">
+                    <!-- Data will be injected here -->
+                </tbody>
             </table>
         </div>
     </div>
 
     <script>
         // ضع قيمك هنا
-        const SUPABASE_URL = "https://iuokwfigwuebutctaxli.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_BWoVwRtLPrIXzUNqembCtA_P7To3GW-";
-
-        function showError(msg) {
-            const errDiv = document.getElementById('error-display');
-            errDiv.classList.remove('hidden');
-            errDiv.innerText = "خطأ: " + msg;
-        }
+        const URL = "https://iuokwfigwuebutctaxli.supabase.co";
+        const KEY = "sb_publishable_BWoVwRtLPrIXzUNqembCtA_P7To3GW-";
+        
+        const supabase = supabase.createClient(URL, KEY);
+        let allData = [];
 
         async function init() {
             try {
-                // فحص المكتبة
-                if (typeof supabase === 'undefined') throw new Error("مكتبة Supabase لم تُحمل");
-
-                const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                
-                // جلب البيانات
-                const { data, error } = await client
-                    .from('network_logs')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
+                const { data, error } = await supabase.from('network_logs').select('*').order('created_at', { ascending: false });
                 if (error) throw error;
-                if (!data) throw new Error("لا توجد بيانات راجعة من القاعدة");
-
-                // عرض البيانات
-                document.getElementById('logs-tbody').innerHTML = data.map(l => `
-                    <tr class="border-b border-slate-800">
-                        <td class="p-4 text-xs">${l.created_at.substring(11,16)}</td>
-                        <td class="p-4 text-sm">${l.log_type}</td>
-                        <td class="p-4 font-bold">${l.username}</td>
-                    </tr>
-                `).join('');
-
-                // عرض الإحصائيات البسيطة
-                document.getElementById('stats-container').innerHTML = `
-                    <div class="glass p-4 rounded-xl text-center"><div class="text-xs text-slate-400">إجمالي السجلات</div><div class="text-xl font-bold">${data.length}</div></div>
-                `;
-
+                allData = data;
+                
+                // إضافة الأنواع للفيلتر
+                const types = [...new Set(data.map(l => l.log_type))];
+                const select = document.getElementById('type-select');
+                types.forEach(t => select.innerHTML += `<option value="${t}">${t}</option>`);
+                
+                render(data);
             } catch (e) {
-                showError(e.message);
-                console.error(e);
+                document.getElementById('status-badge').className = "px-4 py-1 rounded-full text-xs bg-red-900/30 text-red-500 border border-red-500/20";
+                document.getElementById('status-badge').innerText = "خطأ في الاتصال: " + e.message;
             }
+        }
+
+        function render(data) {
+            const tbody = document.getElementById('logs-tbody');
+            tbody.innerHTML = data.map(l => `
+                <tr class="row-anim border-b border-white/5">
+                    <td class="p-5 text-slate-400">${l.created_at.substring(11,16)}</td>
+                    <td class="p-5 font-bold">${l.log_type}</td>
+                    <td class="p-5 text-blue-400 font-mono">${l.username}</td>
+                </tr>
+            `).join('');
+        }
+
+        function applyFilters() {
+            const s = document.getElementById('search-bar').value.toLowerCase();
+            const t = document.getElementById('type-select').value;
+            render(allData.filter(l => l.username.toLowerCase().includes(s) && (t === "" || l.log_type === t)));
+        }
+
+        function clearFilters() {
+            document.getElementById('search-bar').value = "";
+            document.getElementById('type-select').value = "";
+            render(allData);
         }
 
         init();
