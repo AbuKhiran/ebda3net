@@ -2,99 +2,61 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>إبداع نت | لوحة تحكم متقدمة</title>
+    <title>إبداع نت | لوحة التحكم</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- مكتبة سوبابيس -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background: #050505; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; }
-        .glass { background: rgba(20, 20, 20, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
-        .sidebar { border-left: 1px solid rgba(255,255,255,0.1); }
+        body { background: #050505; color: #e2e8f0; font-family: sans-serif; }
     </style>
 </head>
-<body class="flex min-h-screen">
+<body class="p-10">
 
-    <!-- Sidebar (الفلاتر الجانبية) -->
-    <aside class="w-72 p-6 sidebar glass">
-        <h2 class="text-xl font-bold mb-8 text-blue-400">أدوات التصفية</h2>
-        <div id="filters-container" class="space-y-6">
-            <!-- الفلاتر ستظهر هنا ديناميكياً -->
-        </div>
-        <button onclick="clearAll()" class="w-full mt-10 bg-red-900/30 text-red-500 py-3 rounded-xl border border-red-500/30 hover:bg-red-900 transition-all">مسح الفلاتر</button>
-    </aside>
+    <!-- لوحة التنبيه بالأخطاء -->
+    <div id="debug-box" class="hidden bg-red-900 border border-red-500 text-white p-6 rounded-2xl mb-6 shadow-2xl">
+        <h2 class="font-bold text-lg">⚠️ يوجد خطأ في تشغيل اللوحة:</h2>
+        <p id="error-msg" class="mt-2 text-sm opacity-80"></p>
+    </div>
 
-    <!-- Main Content -->
-    <main class="flex-1 p-8">
-        <header class="mb-8">
-            <h1 class="text-3xl font-bold">سجلات الشبكة</h1>
-        </header>
-
-        <div class="glass rounded-3xl overflow-hidden shadow-2xl">
-            <table class="w-full text-right" id="data-table">
-                <thead class="bg-white/5 text-slate-400 text-sm">
-                    <tr id="table-head"></tr>
-                </thead>
-                <tbody id="table-body"></tbody>
-            </table>
-        </div>
-    </main>
+    <div id="content" class="opacity-0 transition-opacity duration-1000">
+        <h1 class="text-2xl font-bold mb-6">لوحة تحكم إبداع نت</h1>
+        <div id="status" class="text-blue-400">جاري فحص الاتصال...</div>
+    </div>
 
     <script>
+        // 1. المتغيرات
         const URL = "https://iuokwfigwuebutctaxli.supabase.co";
         const KEY = "sb_publishable_BWoVwRtLPrIXzUNqembCtA_P7To3GW-";
-        const supabase = supabase.createClient(URL, KEY);
-        
-        let allData = [];
-        const columns = ['log_type', 'username', 'message']; // أعمدة جدولك
+
+        function reportError(msg) {
+            document.getElementById('debug-box').classList.remove('hidden');
+            document.getElementById('error-msg').innerText = msg;
+        }
 
         async function init() {
-            const { data } = await supabase.from('network_logs').select('*');
-            allData = data || [];
-            createFilters();
-            renderTable(allData);
+            try {
+                // فحص هل المكتبة موجودة؟
+                if (typeof supabase === 'undefined') throw new Error("مكتبة Supabase لم تُحمل، تأكد من اتصال الإنترنت أو الرابط.");
+
+                const client = supabase.createClient(URL, KEY);
+                document.getElementById('status').innerText = "جاري جلب البيانات من السيرفر...";
+
+                // جلب البيانات
+                const { data, error } = await client.from('network_logs').select('*');
+                
+                if (error) throw new Error("خطأ من سوبابيس: " + error.message);
+                
+                // إذا وصلنا هنا، الاتصال ناجح
+                document.getElementById('content').classList.remove('opacity-0');
+                document.getElementById('status').innerText = "تم الاتصال بنجاح! عدد السجلات: " + data.length;
+                console.log("البيانات المستلمة:", data);
+
+            } catch (e) {
+                reportError(e.message);
+            }
         }
 
-        function createFilters() {
-            const container = document.getElementById('filters-container');
-            columns.forEach(col => {
-                const uniqueValues = [...new Set(allData.map(item => item[col]))];
-                container.innerHTML += `
-                    <div>
-                        <label class="block text-xs text-slate-500 mb-2 uppercase">${col}</label>
-                        <select onchange="applyFilters()" data-col="${col}" class="filter-input w-full bg-black/40 border border-white/10 p-3 rounded-xl outline-none">
-                            <option value="">الكل</option>
-                            ${uniqueValues.map(v => `<option value="${v}">${v}</option>`).join('')}
-                        </select>
-                    </div>
-                `;
-            });
-            // إضافة رأس الجدول ديناميكياً
-            document.getElementById('table-head').innerHTML = columns.map(c => `<th class="p-5">${c.toUpperCase()}</th>`).join('');
-        }
-
-        function applyFilters() {
-            const filters = document.querySelectorAll('.filter-input');
-            const filtered = allData.filter(item => {
-                return Array.from(filters).every(f => {
-                    const col = f.getAttribute('data-col');
-                    return f.value === "" || item[col] == f.value;
-                });
-            });
-            renderTable(filtered);
-        }
-
-        function renderTable(data) {
-            document.getElementById('table-body').innerHTML = data.map(item => `
-                <tr class="border-b border-white/5 hover:bg-white/5 transition-all">
-                    ${columns.map(c => `<td class="p-5 text-sm">${item[c]}</td>`).join('')}
-                </tr>
-            `).join('');
-        }
-
-        function clearAll() {
-            document.querySelectorAll('.filter-input').forEach(f => f.value = "");
-            renderTable(allData);
-        }
-
+        // تشغيل
         init();
     </script>
 </body>
