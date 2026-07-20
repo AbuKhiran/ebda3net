@@ -2,62 +2,118 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>إبداع نت | لوحة التحكم</title>
+    <title>لوحة تحكم إبداع نت | الإدارة المتطورة</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- مكتبة سوبابيس -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background: #050505; color: #e2e8f0; font-family: sans-serif; }
+        body { background: #050505; color: #e2e8f0; font-family: 'Segoe UI', sans-serif; }
+        .glass { background: rgba(20, 20, 20, 0.7); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.1); }
+        .sidebar { border-left: 1px solid rgba(255,255,255,0.1); }
+        table th { background: rgba(255,255,255,0.03); }
+        tr:hover { background: rgba(59, 130, 246, 0.05); }
     </style>
 </head>
-<body class="p-10">
+<body class="flex min-h-screen">
 
-    <!-- لوحة التنبيه بالأخطاء -->
-    <div id="debug-box" class="hidden bg-red-900 border border-red-500 text-white p-6 rounded-2xl mb-6 shadow-2xl">
-        <h2 class="font-bold text-lg">⚠️ يوجد خطأ في تشغيل اللوحة:</h2>
-        <p id="error-msg" class="mt-2 text-sm opacity-80"></p>
-    </div>
+    <!-- Sidebar (الفلاتر) -->
+    <aside class="w-80 p-8 sidebar glass hidden md:block">
+        <h2 class="text-2xl font-bold mb-8 text-blue-400">لوحة التحكم</h2>
+        <div id="filters-container" class="space-y-6"></div>
+        <button onclick="clearAll()" class="w-full mt-10 bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl font-bold transition-all">مسح كافة الفلاتر</button>
+    </aside>
 
-    <div id="content" class="opacity-0 transition-opacity duration-1000">
-        <h1 class="text-2xl font-bold mb-6">لوحة تحكم إبداع نت</h1>
-        <div id="status" class="text-blue-400">جاري فحص الاتصال...</div>
-    </div>
+    <!-- Main Content -->
+    <main class="flex-1 p-8">
+        <header class="mb-8 flex justify-between items-center">
+            <h1 class="text-3xl font-bold text-white">سجلات الشبكة الحية</h1>
+            <div id="status-tag" class="px-4 py-1 rounded-full text-xs bg-slate-800 text-slate-400 border border-slate-700">جاري الاتصال...</div>
+        </header>
+
+        <div class="glass rounded-3xl overflow-hidden shadow-2xl">
+            <table class="w-full text-right" id="data-table">
+                <thead class="text-slate-400 text-sm">
+                    <tr id="table-head"></tr>
+                </thead>
+                <tbody id="table-body" class="divide-y divide-white/5"></tbody>
+            </table>
+        </div>
+    </main>
 
     <script>
-        // 1. المتغيرات
-      // تأكد أن الرابط يبدأ بـ https ولا ينتهي بـ /
-const URL = "https://iuokwfigwuebutctaxli.supabase.co"; 
-const KEY = "sb_publishable_BWoVwRtLPrIXzUNqembCtA_P7To3GW-";
-
-        function reportError(msg) {
-            document.getElementById('debug-box').classList.remove('hidden');
-            document.getElementById('error-msg').innerText = msg;
-        }
+        // --- الإعدادات ---
+        const URL = "https://iuokwfigwuebutctaxli.supabase.co";
+        const KEY = "sb_publishable_BWoVwRtLPrIXzUNqembCtA_P7To3GW-"; // [تنبيه: انسخ المفتاح الذي يبدأ بـ eyJ من Supabase]
+        
+        const supabase = supabase.createClient(URL, KEY);
+        let allData = [];
+        const columns = ['log_type', 'username', 'message', 'created_at'];
 
         async function init() {
             try {
-                // فحص هل المكتبة موجودة؟
-                if (typeof supabase === 'undefined') throw new Error("مكتبة Supabase لم تُحمل، تأكد من اتصال الإنترنت أو الرابط.");
-
-                const client = supabase.createClient(URL, KEY);
-                document.getElementById('status').innerText = "جاري جلب البيانات من السيرفر...";
-
-                // جلب البيانات
-                const { data, error } = await client.from('network_logs').select('*');
+                const statusTag = document.getElementById('status-tag');
+                statusTag.innerText = "جاري جلب البيانات...";
                 
-                if (error) throw new Error("خطأ من سوبابيس: " + error.message);
+                const { data, error } = await supabase.from('network_logs').select('*').order('created_at', { ascending: false });
                 
-                // إذا وصلنا هنا، الاتصال ناجح
-                document.getElementById('content').classList.remove('opacity-0');
-                document.getElementById('status').innerText = "تم الاتصال بنجاح! عدد السجلات: " + data.length;
-                console.log("البيانات المستلمة:", data);
-
+                if (error) throw error;
+                
+                allData = data || [];
+                statusTag.innerText = "متصل - " + allData.length + " سجل";
+                statusTag.className = "px-4 py-1 rounded-full text-xs bg-emerald-900/30 text-emerald-500 border border-emerald-500/20";
+                
+                buildUI();
             } catch (e) {
-                reportError(e.message);
+                document.getElementById('status-tag').innerText = "خطأ في الاتصال";
+                document.getElementById('status-tag').className = "px-4 py-1 rounded-full text-xs bg-red-900/30 text-red-500 border border-red-500/20";
+                console.error(e);
             }
         }
 
-        // تشغيل
+        function buildUI() {
+            // بناء الرؤوس
+            document.getElementById('table-head').innerHTML = columns.map(c => `<th class="p-5">${c.replace('_', ' ').toUpperCase()}</th>`).join('');
+            
+            // بناء الفلاتر
+            const container = document.getElementById('filters-container');
+            columns.forEach(col => {
+                const uniqueValues = [...new Set(allData.map(item => item[col]))].filter(Boolean);
+                container.innerHTML += `
+                    <div>
+                        <label class="block text-xs text-slate-500 mb-2">${col.toUpperCase()}</label>
+                        <select onchange="applyFilters()" data-col="${col}" class="filter-input w-full bg-black/40 border border-white/10 p-3 rounded-xl outline-none focus:border-blue-500">
+                            <option value="">-- الكل --</option>
+                            ${uniqueValues.map(v => `<option value="${v}">${v}</option>`).join('')}
+                        </select>
+                    </div>
+                `;
+            });
+            renderTable(allData);
+        }
+
+        function applyFilters() {
+            const filters = document.querySelectorAll('.filter-input');
+            const filtered = allData.filter(item => {
+                return Array.from(filters).every(f => {
+                    const col = f.getAttribute('data-col');
+                    return f.value === "" || item[col] == f.value;
+                });
+            });
+            renderTable(filtered);
+        }
+
+        function renderTable(data) {
+            document.getElementById('table-body').innerHTML = data.map(item => `
+                <tr class="transition-all">
+                    ${columns.map(c => `<td class="p-5 text-sm">${item[c] || '-'}</td>`).join('')}
+                </tr>
+            `).join('');
+        }
+
+        function clearAll() {
+            document.querySelectorAll('.filter-input').forEach(f => f.value = "");
+            renderTable(allData);
+        }
+
         init();
     </script>
 </body>
