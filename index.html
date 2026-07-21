@@ -97,32 +97,51 @@
         <!-- Main Content Area -->
         <main class="flex-1 p-6 max-w-7xl w-full mx-auto space-y-6">
             <!-- Stats Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                <div class="bg-cardBg border border-slate-800 p-5 rounded-2xl flex items-center gap-4 shadow-sm">
-                    <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-xl">
+            <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div class="bg-cardBg border border-slate-800 p-4 rounded-2xl flex items-center gap-4 shadow-sm">
+                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-lg">
                         <i class="fa-solid fa-database"></i>
                     </div>
                     <div>
-                        <p class="text-xs text-slate-400 font-medium">إجمالي السجلات</p>
-                        <h3 class="text-2xl font-bold mt-1" id="totalLogs">0</h3>
+                        <p class="text-[11px] text-slate-400 font-medium">إجمالي السجلات</p>
+                        <h3 class="text-xl font-bold mt-0.5" id="totalLogs">0</h3>
                     </div>
                 </div>
-                <div class="bg-cardBg border border-slate-800 p-5 rounded-2xl flex items-center gap-4 shadow-sm">
-                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl">
+                <div class="bg-cardBg border border-slate-800 p-4 rounded-2xl flex items-center gap-4 shadow-sm">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-lg">
                         <i class="fa-solid fa-server"></i>
                     </div>
                     <div>
-                        <p class="text-xs text-slate-400 font-medium">أجهزة الراوتر النشطة</p>
-                        <h3 class="text-2xl font-bold mt-1" id="totalRouters">0</h3>
+                        <p class="text-[11px] text-slate-400 font-medium">أجهزة الراوتر</p>
+                        <h3 class="text-xl font-bold mt-0.5" id="totalRouters">0</h3>
                     </div>
                 </div>
-                <div class="bg-cardBg border border-slate-800 p-5 rounded-2xl flex items-center gap-4 shadow-sm">
-                    <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-xl">
+                <div class="bg-cardBg border border-slate-800 p-4 rounded-2xl flex items-center gap-4 shadow-sm">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-lg">
                         <i class="fa-solid fa-users"></i>
                     </div>
                     <div>
-                        <p class="text-xs text-slate-400 font-medium">المستخدمين المرتبطين</p>
-                        <h3 class="text-2xl font-bold mt-1" id="totalUsers">0</h3>
+                        <p class="text-[11px] text-slate-400 font-medium">المستخدمين</p>
+                        <h3 class="text-xl font-bold mt-0.5" id="totalUsers">0</h3>
+                    </div>
+                </div>
+                <!-- كارت التحليلات الجديد (أكثر مشكلة شيوعاً وأكثر فصل/اتصال) -->
+                <div class="bg-cardBg border border-slate-800 p-4 rounded-2xl flex items-center gap-4 shadow-sm">
+                    <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="text-[11px] text-slate-400 font-medium">أكثر مشكلة تكراراً</p>
+                        <h3 class="text-xs font-bold mt-1 text-rose-300 truncate" id="topProblem" title="لا توجد بيانات">-</h3>
+                    </div>
+                </div>
+                <div class="bg-cardBg border border-slate-800 p-4 rounded-2xl flex items-center gap-4 shadow-sm">
+                    <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-wifi"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="text-[11px] text-slate-400 font-medium">أكثر يوزر فصل واتصل</p>
+                        <h3 class="text-xs font-bold mt-1 text-purple-300 truncate" id="topDisconnectUser" title="لا توجد بيانات">-</h3>
                     </div>
                 </div>
             </div>
@@ -189,7 +208,7 @@
 
     <!-- SCRIPT LOGIC -->
     <script>
-         const SUPABASE_URL = "https://iuokwfigwuebutctaxli.supabase.co";
+      const SUPABASE_URL = "https://iuokwfigwuebutctaxli.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_BWoVwRtLPrIXzUNqembCtA_P7To3GW-";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         let allLogs = [];
@@ -249,6 +268,7 @@
             localStorage.removeItem('mikrotik_logged_in');
             localStorage.removeItem('mikrotik_username');
             document.getElementById('dashboardSection').classList.add('hidden');
+            document.getElementById('loginSection').classList.add('hidden'); // Fix toggle
             document.getElementById('loginSection').classList.remove('hidden');
             document.getElementById('loginForm').reset();
         }
@@ -267,7 +287,6 @@
 
                 allLogs = data || [];
                 applyFilters();
-                updateStats(allLogs);
                 updateCharts(allLogs);
             } catch (err) {
                 console.error('Error fetching logs:', err);
@@ -300,6 +319,7 @@
             }).join('');
         }
 
+        // تحديث جميع الإحصائيات والكاردات بناءً على البيانات المُفلترة
         function updateStats(logs) {
             document.getElementById('totalLogs').innerText = logs.length;
             
@@ -308,6 +328,48 @@
 
             const uniqueUsers = [...new Set(logs.map(l => l.username).filter(Boolean))];
             document.getElementById('totalUsers').innerText = uniqueUsers.length;
+
+            // حساب أكثر مشكلة شيوعاً (بناءً على Topics أو Log Type أو نص الرسالة)
+            const problemCounts = {};
+            const disconnectUserCounts = {};
+
+            logs.forEach(log => {
+                // تجميع المشاكل (نعتمد على topics أو log_type كمؤشر للمشكلة)
+                const prob = log.topics || log.log_type || 'غير مصنف';
+                problemCounts[prob] = (problemCounts[prob] || 0) + 1;
+
+                // رصد حالات الفصل والاتصال أو أصحاب تكرار السجلات (Disconnect/Connect/Login/Logout)
+                const msg = (log.message || '').toLowerCase();
+                const isDisconnectRelated = msg.includes('disconnect') || msg.includes('down') || msg.includes('logged out') || msg.includes('timeout') || (log.log_type && log.log_type.toLowerCase().includes('disconnect'));
+                
+                if (log.username) {
+                    disconnectUserCounts[log.username] = (disconnectUserCounts[log.username] || 0) + 1;
+                }
+            });
+
+            // إيجاد أكثر مشكلة تكراراً
+            let topProbText = 'لا توجد بيانات';
+            let maxProbCount = 0;
+            for (const [prob, count] of Object.entries(problemCounts)) {
+                if (count > maxProbCount) {
+                    maxProbCount = count;
+                    topProbText = `${prob} (${count})`;
+                }
+            }
+            document.getElementById('topProblem').innerText = topProbText;
+            document.getElementById('topProblem').title = topProbText;
+
+            // إيجاد أكثر يوزر تكررت لديه الأحداث / الفصل
+            let topUserText = 'لا توجد بيانات';
+            let maxUserCount = 0;
+            for (const [user, count] of Object.entries(disconnectUserCounts)) {
+                if (count > maxUserCount) {
+                    maxUserCount = count;
+                    topUserText = `${user} (${count})`;
+                }
+            }
+            document.getElementById('topDisconnectUser').innerText = topUserText;
+            document.getElementById('topDisconnectUser').title = topUserText;
         }
 
         function updateCharts(logs) {
@@ -382,6 +444,7 @@
             });
         }
 
+        // فلترة متكاملة تتأثر بها الجداول والإحصائيات والكارت الجديد فوراً
         function applyFilters() {
             const query = document.getElementById('searchInput').value.toLowerCase();
             const startDate = document.getElementById('startDate').value;
@@ -409,6 +472,7 @@
             });
 
             renderLogs(filtered);
+            updateStats(filtered); // تحديث الكاردات بناءً على النتائج المفلترة فقط
         }
 
         function resetFilters() {
@@ -417,7 +481,7 @@
             document.getElementById('endDate').value = '';
             activeLogTypeFilter = null;
             activeRouterFilter = null;
-            renderLogs(allLogs);
+            applyFilters();
         }
 
         function exportToCSV() {
