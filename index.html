@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Chart.js للرسوم البيانية -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -80,6 +82,10 @@
                     <i class="fa-solid fa-rotate-right" id="refreshIcon"></i>
                     <span class="hidden sm:inline">تحديث</span>
                 </button>
+                <button onclick="exportToCSV()" class="flex items-center gap-2 px-3 py-2 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 rounded-lg text-sm transition-colors border border-emerald-500/20">
+                    <i class="fa-solid fa-file-excel"></i>
+                    <span class="hidden sm:inline">تصدير CSV</span>
+                </button>
                 <div class="h-6 w-px bg-slate-800"></div>
                 <button onclick="handleLogout()" class="flex items-center gap-2 px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg text-sm transition-colors border border-red-500/20">
                     <i class="fa-solid fa-right-from-bracket"></i>
@@ -121,14 +127,38 @@
                 </div>
             </div>
 
-            <!-- Controls & Filters -->
-            <div class="bg-cardBg border border-slate-800 p-4 rounded-2xl flex flex-col sm:flex-row gap-4 items-center justify-between">
-                <div class="relative w-full sm:w-96">
-                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400"><i class="fa-solid fa-magnifying-glass"></i></span>
-                    <input type="text" id="searchInput" oninput="filterLogs()" placeholder="بحث في السجلات (المستخدم، الأيبي، الرسالة)..." class="w-full pr-10 pl-4 py-2.5 bg-slate-900/50 border border-slate-700/80 rounded-xl text-sm focus:outline-none focus:border-blue-500 transition-colors">
+            <!-- Charts Section (خطوة 2) -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-cardBg border border-slate-800 p-5 rounded-2xl shadow-sm">
+                    <h3 class="text-sm font-semibold text-slate-300 mb-4"><i class="fa-solid fa-chart-pie ml-2 text-blue-400"></i>توزيع أنواع السجلات (Log Types)</h3>
+                    <div class="h-64 flex items-center justify-center">
+                        <canvas id="logTypeChart"></canvas>
+                    </div>
                 </div>
-                <div class="text-xs text-slate-400">
-                    آخر تحديث: <span id="lastUpdateTime" class="font-medium text-slate-200">الآن</span>
+                <div class="bg-cardBg border border-slate-800 p-5 rounded-2xl shadow-sm">
+                    <h3 class="text-sm font-semibold text-slate-300 mb-4"><i class="fa-solid fa-chart-line ml-2 text-emerald-400"></i>نشاط أجهزة الراوتر (Router IPs)</h3>
+                    <div class="h-64 flex items-center justify-center">
+                        <canvas id="routerChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls, Search & Date Filters (خطوة 3) -->
+            <div class="bg-cardBg border border-slate-800 p-4 rounded-2xl flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div class="relative w-full md:w-80">
+                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400"><i class="fa-solid fa-magnifying-glass"></i></span>
+                    <input type="text" id="searchInput" oninput="applyFilters()" placeholder="بحث في السجلات..." class="w-full pr-10 pl-4 py-2 bg-slate-900/50 border border-slate-700/80 rounded-xl text-sm focus:outline-none focus:border-blue-500 transition-colors">
+                </div>
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <div class="flex items-center gap-2 text-xs text-slate-400">
+                        <span>من:</span>
+                        <input type="date" id="startDate" onchange="applyFilters()" class="bg-slate-900/50 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-200 text-xs">
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-slate-400">
+                        <span>إلى:</span>
+                        <input type="date" id="endDate" onchange="applyFilters()" class="bg-slate-900/50 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-200 text-xs">
+                    </div>
+                    <button onclick="resetFilters()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs transition-colors">إعادة ضبط</button>
                 </div>
             </div>
 
@@ -159,14 +189,14 @@
 
     <!-- SCRIPT LOGIC -->
     <script>
-        // إعدادات اتصال Supabase الخاصة بك
-     
-         const SUPABASE_URL = "https://iuokwfigwuebutctaxli.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_BWoVwRtLPrIXzUNqembCtA_P7To3GW-";
+        const SUPABASE_URL = 'ضع_رابط_المشروع_هنا_SUPABASE_URL';
+        const SUPABASE_ANON_KEY = 'ضع_مفتاح_ANON_KEY_هنا';
+        
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         let allLogs = [];
+        let typeChartInstance = null;
+        let routerChartInstance = null;
 
-        // التحقق من حالة الجلسة عند فتح الصفحة
         window.addEventListener('DOMContentLoaded', () => {
             const session = localStorage.getItem('mikrotik_logged_in');
             if (session === 'true') {
@@ -174,7 +204,6 @@
             }
         });
 
-        // دالة تسجيل الدخول
         async function handleLogin(e) {
             e.preventDefault();
             const usernameInput = document.getElementById('username').value.trim();
@@ -186,7 +215,6 @@
             loginBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> جاري التحقق...`;
 
             try {
-                // البحث في جدول system_users
                 const { data, error } = await supabaseClient
                     .from('system_users')
                     .select('*')
@@ -223,7 +251,6 @@
             document.getElementById('loginForm').reset();
         }
 
-        // جلب السجلات من جدول network_logs
         async function fetchLogs() {
             const refreshIcon = document.getElementById('refreshIcon');
             refreshIcon.classList.add('fa-spin');
@@ -237,10 +264,9 @@
                 if (error) throw error;
 
                 allLogs = data || [];
-                renderLogs(allLogs);
+                applyFilters();
                 updateStats(allLogs);
-                
-                document.getElementById('lastUpdateTime').innerText = new Date().toLocaleTimeString('ar-SA');
+                updateCharts(allLogs);
             } catch (err) {
                 console.error('Error fetching logs:', err);
             } finally {
@@ -248,7 +274,6 @@
             }
         }
 
-        // عرض السجلات في الجدول
         function renderLogs(logs) {
             const tbody = document.getElementById('logsTableBody');
             if (logs.length === 0) {
@@ -273,7 +298,6 @@
             }).join('');
         }
 
-        // تحديث الإحصائيات العلوية
         function updateStats(logs) {
             document.getElementById('totalLogs').innerText = logs.length;
             
@@ -284,18 +308,129 @@
             document.getElementById('totalUsers').innerText = uniqueUsers.length;
         }
 
-        // فلترة البيانات عند البحث
-        function filterLogs() {
+        // دالة تحديث الرسوم البيانية (Chart.js)
+        function updateCharts(logs) {
+            // تجميع حسب log_type
+            const typeCounts = {};
+            // تجميع حسب router_ip
+            const routerCounts = {};
+
+            logs.forEach(log => {
+                const type = log.log_type || 'General';
+                typeCounts[type] = (typeCounts[type] || 0) + 1;
+
+                const router = log.router_ip || 'Unknown';
+                routerCounts[router] = (routerCounts[router] || 0) + 1;
+            });
+
+            // رسم دائري لأنواع السجلات
+            const typeCtx = document.getElementById('logTypeChart').getContext('2d');
+            if (typeChartInstance) typeChartInstance.destroy();
+            typeChartInstance = new Chart(typeCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(typeCounts),
+                    datasets: [{
+                        data: Object.values(typeCounts),
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { family: 'sans-serif' } } } }
+                }
+            });
+
+            // رسم عمودي لأجهزة الراوتر
+            const routerCtx = document.getElementById('routerChart').getContext('2d');
+            if (routerChartInstance) routerChartInstance.destroy();
+            routerChartInstance = new Chart(routerCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(routerCounts),
+                    datasets: [{
+                        label: 'عدد السجلات',
+                        data: Object.values(routerCounts),
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
+                        x: { ticks: { color: '#94a3b8' }, grid: { display: false } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        // فلترة متكاملة (بحث + نطاق تاريخ)
+        function applyFilters() {
             const query = document.getElementById('searchInput').value.toLowerCase();
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
             const filtered = allLogs.filter(log => {
-                return (
+                const matchesQuery = (
                     (log.username && log.username.toLowerCase().includes(query)) ||
                     (log.router_ip && log.router_ip.toLowerCase().includes(query)) ||
                     (log.message && log.message.toLowerCase().includes(query)) ||
                     (log.topics && log.topics.toLowerCase().includes(query))
                 );
+
+                let matchesDate = true;
+                if (log.created_at) {
+                    const logDate = log.created_at.split('T')[0];
+                    if (startDate && logDate < startDate) matchesDate = false;
+                    if (endDate && logDate > endDate) matchesDate = false;
+                }
+
+                return matchesQuery && matchesDate;
             });
+
             renderLogs(filtered);
+        }
+
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            renderLogs(allLogs);
+        }
+
+        // تصدير البيانات إلى ملف CSV
+        function exportToCSV() {
+            if (allLogs.length === 0) {
+                alert('لا توجد بيانات للتصدير');
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,ID,Created At,Router IP,Topics,Log Type,Username,Message\r\n";
+            allLogs.forEach(log => {
+                const row = [
+                    log.id,
+                    `"${log.created_at || ''}"`,
+                    `"${log.router_ip || ''}"`,
+                    `"${log.topics || ''}"`,
+                    `"${log.log_type || ''}"`,
+                    `"${log.username || ''}"`,
+                    `"${(log.message || '').replace(/"/g, '""')}"`
+                ];
+                csvContent += row.join(",") + "\r\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "mikrotik_network_logs.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     </script>
 </body>
