@@ -59,16 +59,12 @@
 
             <div class="overflow-y-auto space-y-4 pr-1 text-sm text-slate-300 leading-relaxed flex-1">
                 <div class="p-3 bg-slate-900/50 rounded-xl border border-slate-800">
-                    <h4 class="font-bold text-blue-400 mb-1 flex items-center gap-2"><i class="fa-solid fa-check"></i> الواجهة وهيكل النظام المتقدم</h4>
-                    <p class="text-xs text-slate-400">منظومة مراقبة متكاملة تتضمن تسجيل الدخول، الرسوم البيانية، التصدير، والفلترة الزمنية وحسب المستخدمين.</p>
+                    <h4 class="font-bold text-blue-400 mb-1 flex items-center gap-2"><i class="fa-solid fa-check"></i> العرض الافتراضي ليوم واحد والتحديث التلقائي (محدث 🔥)</h4>
+                    <p class="text-xs text-slate-400">النظام يفتح افتراضياً على بيانات اليوم الحالي فقط، مع تفعيل التحديث التلقائي والملخص اليومي بشكل مباشر.</p>
                 </div>
                 <div class="p-3 bg-slate-900/50 rounded-xl border border-slate-800">
-                    <h4 class="font-bold text-emerald-400 mb-1 flex items-center gap-2"><i class="fa-solid fa-check"></i> مركز الإشعارات والتنبيهات الحية</h4>
-                    <p class="text-xs text-slate-400">تنبيهات صوتية وفورية مع سجل محفوظ للإشعارات الطارئة ومتابعة فصل المشتركين.</p>
-                </div>
-                <div class="p-3 bg-slate-900/50 rounded-xl border border-slate-800">
-                    <h4 class="font-bold text-amber-400 mb-1 flex items-center gap-2"><i class="fa-solid fa-check"></i> جدول حالة المشتركين والملخص التنفيذي (جديد 🔥)</h4>
-                    <p class="text-xs text-slate-400">عرض حالة كل مشترك فورياً (متصل / غير متصل) مع نقطة ضوئية ذكية، وزر لتوليد تقرير تنفيذي شامل بضغطة زر واحدة.</p>
+                    <h4 class="font-bold text-emerald-400 mb-1 flex items-center gap-2"><i class="fa-solid fa-check"></i> جدول حالة المشتركين اللحظية</h4>
+                    <p class="text-xs text-slate-400">مؤشرات بصرية دقيقة (🟢 متصل / 🔴 غير متصل) استناداً إلى أحدث سجل لكل مستخدم في قاعدة البيانات.</p>
                 </div>
             </div>
 
@@ -78,11 +74,11 @@
         </div>
     </div>
 
-    <!-- EXECUTIVE SUMMARY MODAL (نافذة الملخص التنفيذي) -->
+    <!-- EXECUTIVE SUMMARY MODAL -->
     <div id="summaryModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
         <div class="bg-cardBg border border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative">
             <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-4">
-                <h3 class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-file-contract text-blue-400"></i> التقرير التنفيذي اليومي للشبكة</h3>
+                <h3 class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-file-contract text-blue-400"></i> التقرير التنفيذي لليوم الحالي</h3>
                 <button onclick="closeSummaryModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div id="summaryContent" class="bg-slate-900/80 border border-slate-800 p-4 rounded-xl text-xs text-slate-300 font-mono leading-relaxed whitespace-pre-line mb-4 max-h-60 overflow-y-auto">
@@ -172,9 +168,9 @@
                     </div>
                 </div>
 
-                <button onclick="toggleAutoRefresh()" id="autoRefreshBtn" class="flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs transition-colors border border-slate-700">
+                <button onclick="toggleAutoRefresh()" id="autoRefreshBtn" class="flex items-center gap-2 px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-slate-300 rounded-lg text-xs transition-colors border border-blue-500">
                     <i class="fa-solid fa-clock text-blue-400"></i>
-                    <span id="autoRefreshText">التحديث: متوقف</span>
+                    <span id="autoRefreshText">التحديث: مفعل (30ث)</span>
                 </button>
                 <button onclick="toggleFullScreen()" class="flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs transition-colors border border-slate-700" title="وضع الشاشة الكاملة">
                     <i class="fa-solid fa-expand"></i>
@@ -205,7 +201,7 @@
                         <i class="fa-solid fa-database"></i>
                     </div>
                     <div>
-                        <p class="text-[11px] text-slate-400 font-medium">إجمالي السجلات</p>
+                        <p class="text-[11px] text-slate-400 font-medium">إجمالي السجلات (اليوم)</p>
                         <h3 class="text-xl font-bold mt-0.5" id="totalLogs">0</h3>
                     </div>
                 </div>
@@ -263,7 +259,7 @@
                 </div>
             </div>
 
-            <!-- NEW: Users Status Table (جدول حالة المستخدمين الحاليين) -->
+            <!-- Users Status Table (حالة المشتركين اللحظية) -->
             <div class="bg-cardBg border border-slate-800 p-5 rounded-2xl shadow-sm">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-sm font-semibold text-slate-300 flex items-center gap-2"><i class="fa-solid fa-signal text-emerald-400"></i>حالة المشتركين اللحظية (بناءً على آخر سجل)</h3>
@@ -301,10 +297,10 @@
                 <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-800">
                     <span class="text-xs text-slate-400 ml-2"><i class="fa-solid fa-bolt text-amber-400"></i> فلترة سريعة:</span>
                     <button onclick="setQuickTime('hour')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs transition-colors border border-slate-700">آخر ساعة</button>
-                    <button onclick="setQuickTime('today')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs transition-colors border border-slate-700">اليوم</button>
+                    <button onclick="setQuickTime('today')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs transition-colors border border-slate-700">اليوم فقط</button>
                     <button onclick="setQuickTime('week')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs transition-colors border border-slate-700">آخر 7 أيام</button>
                     <button onclick="setQuickTime('month')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs transition-colors border border-slate-700">آخر 30 يوم</button>
-                    <button onclick="resetFilters()" class="px-3 py-1 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg text-xs transition-colors border border-red-500/20 mr-auto">إعادة ضبط الكل</button>
+                    <button onclick="resetToToday()" class="px-3 py-1 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 rounded-lg text-xs transition-colors border border-blue-500/20 mr-auto">عرض بيانات اليوم</button>
                 </div>
             </div>
 
@@ -335,7 +331,7 @@
 
     <!-- SCRIPT LOGIC -->
     <script>
-    const SUPABASE_URL = "https://iuokwfigwuebutctaxli.supabase.co";
+        const SUPABASE_URL = "https://iuokwfigwuebutctaxli.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_BWoVwRtLPrIXzUNqembCtA_P7To3GW-";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         let allLogs = [];
@@ -349,11 +345,33 @@
         let savedNotifications = [];
 
         window.addEventListener('DOMContentLoaded', () => {
+            // تعيين حقول التاريخ لليوم الحالي افتراضياً عند التحميل
+            setDefaultDatesToToday();
+
             const session = localStorage.getItem('mikrotik_logged_in');
             if (session === 'true') {
                 showDashboard();
             }
         });
+
+        function setDefaultDatesToToday() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            const startInput = document.getElementById('startDate');
+            const endInput = document.getElementById('endDate');
+            if(startInput && endInput) {
+                startInput.value = todayStr;
+                endInput.value = todayStr;
+            }
+        }
+
+        function resetToToday() {
+            setDefaultDatesToToday();
+            document.getElementById('searchInput').value = '';
+            document.getElementById('userQuickFilter').value = '';
+            activeLogTypeFilter = null;
+            activeRouterFilter = null;
+            applyFilters();
+        }
 
         function openFeaturesModal() {
             document.getElementById('featuresModal').classList.remove('hidden');
@@ -371,17 +389,44 @@
         }
 
         function generateSummaryText() {
-            const total = allLogs.length;
-            const routers = [...new Set(allLogs.map(l => l.router_ip).filter(Boolean))].length;
-            const users = [...new Set(allLogs.map(l => l.username).filter(Boolean))].length;
+            // التقرير سيعتمد على السجلات المفلترة حالياً (بيانات اليوم فقط افتراضياً)
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const selectedUser = document.getElementById('userQuickFilter').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            const filteredLogs = allLogs.filter(log => {
+                const matchesQuery = (
+                    (log.username && log.username.toLowerCase().includes(query)) ||
+                    (log.router_ip && log.router_ip.toLowerCase().includes(query)) ||
+                    (log.message && log.message.toLowerCase().includes(query)) ||
+                    (log.topics && log.topics.toLowerCase().includes(query))
+                );
+                const matchesUser = selectedUser ? (log.username === selectedUser) : true;
+                let matchesDate = true;
+                if (log.created_at) {
+                    const logDate = log.created_at.split('T')[0];
+                    if (startDate && logDate < startDate) matchesDate = false;
+                    if (endDate && logDate > endDate) matchesDate = false;
+                }
+                const matchesChartType = activeLogTypeFilter ? (log.log_type === activeLogTypeFilter || (!log.log_type && activeLogTypeFilter === 'General')) : true;
+                const matchesChartRouter = activeRouterFilter ? (log.router_ip === activeRouterFilter || (!log.router_ip && activeRouterFilter === 'Unknown')) : true;
+                return matchesQuery && matchesUser && matchesDate && matchesChartType && matchesChartRouter;
+            });
+
+            const total = filteredLogs.length;
+            const routers = [...new Set(filteredLogs.map(l => l.router_ip).filter(Boolean))].length;
+            const users = [...new Set(filteredLogs.map(l => l.username).filter(Boolean))].length;
             
             let topProb = document.getElementById('topProblem').innerText;
             let topUser = document.getElementById('topDisconnectUser').innerText;
+            const dateRangeText = startDate === endDate ? `تاريخ اليوم: ${startDate}` : `الفترة من ${startDate} إلى ${endDate}`;
 
             const text = `📊 التقرير التنفيذي لشبكة Ebda3 Net\n` +
                          `------------------------------------\n` +
-                         `🕒 وقت الإصدار: ${new Date().toLocaleString('ar-SA')}\n` +
-                         `📈 إجمالي السجلات المرصودة: ${total}\n` +
+                         `📅 النطاق الزمني: ${dateRangeText}\n` +
+                         `🕒 وقت الإصدار: ${new Date().toLocaleTimeString('ar-SA')}\n` +
+                         `📈 إجمالي السجلات: ${total}\n` +
                          `🌐 أجهزة الراوتر النشطة: ${routers}\n` +
                          `👥 عدد المستخدمين: ${users}\n` +
                          `⚠️ المشكلة الأكثر تكراراً: ${topProb}\n` +
@@ -415,10 +460,12 @@
                 isAutoRefreshActive = false;
                 btnText.innerText = "التحديث: متوقف";
                 btn.classList.remove('border-blue-500', 'bg-blue-500/10');
+                btn.classList.add('border-slate-700', 'bg-slate-800');
             } else {
                 autoRefreshInterval = setInterval(() => fetchLogs(), 30000);
                 isAutoRefreshActive = true;
                 btnText.innerText = "التحديث: مفعل (30ث)";
+                btn.classList.remove('border-slate-700', 'bg-slate-800');
                 btn.classList.add('border-blue-500', 'bg-blue-500/10');
             }
         }
@@ -503,6 +550,13 @@
         function showDashboard() {
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('dashboardSection').classList.remove('hidden');
+            
+            // تفعيل التحديث التلقائي افتراضياً عند الدخول
+            if (!isAutoRefreshActive) {
+                autoRefreshInterval = setInterval(() => fetchLogs(), 30000);
+                isAutoRefreshActive = true;
+            }
+
             fetchLogs();
             initRealtimeSubscription();
         }
@@ -510,6 +564,7 @@
         function handleLogout() {
             localStorage.removeItem('mikrotik_logged_in');
             if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+            isAutoRefreshActive = false;
             document.getElementById('dashboardSection').classList.add('hidden');
             document.getElementById('loginSection').classList.remove('hidden');
             document.getElementById('loginForm').reset();
@@ -554,12 +609,10 @@
                 .subscribe();
         }
 
-        // جدول حالة المستخدمين اللحظية بناءً على آخر سجل
         function updateUsersStatusTable(logs) {
             const container = document.getElementById('usersStatusContainer');
             const userLatestLog = {};
 
-            // بما أن السجلات مرتبة من الأحدث للأقدم، أول ظهور لليوزر هو أحدث حالة له
             logs.forEach(log => {
                 if (log.username && !userLatestLog[log.username]) {
                     userLatestLog[log.username] = log;
@@ -574,7 +627,6 @@
 
             container.innerHTML = usernames.map(user => {
                 const log = userLatestLog[user];
-                // نعتبر اليوزر "متصل" (أخضر) إذا لم تكن رسالته تدل على فصل أو توقف صريح، أو حسب نوع السجل
                 const msg = (log.message || '').toLowerCase();
                 const type = (log.log_type || '').toLowerCase();
                 const isDisconnected = msg.includes('disconnect') || msg.includes('down') || msg.includes('فصل') || type.includes('error');
@@ -673,7 +725,7 @@
         function renderLogs(logs) {
             const tbody = document.getElementById('logsTableBody');
             if (logs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-500">لا توجد سجلات مطابقة</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-500">لا توجد سجلات مطابقة للفترة المحددة</td></tr>`;
                 return;
             }
             tbody.innerHTML = logs.map(log => {
@@ -800,16 +852,6 @@
 
             renderLogs(filtered);
             updateStats(filtered);
-        }
-
-        function resetFilters() {
-            document.getElementById('searchInput').value = '';
-            document.getElementById('userQuickFilter').value = '';
-            document.getElementById('startDate').value = '';
-            document.getElementById('endDate').value = '';
-            activeLogTypeFilter = null;
-            activeRouterFilter = null;
-            applyFilters();
         }
 
         function exportToCSV() {
