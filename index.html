@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MikroTik Network Dashboard</title>
+    <title>Ebda3 Network Dashboard</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -189,10 +189,9 @@
 
     <!-- SCRIPT LOGIC -->
     <script>
-        const SUPABASE_URL = 'ضع_رابط_المشروع_هنا_SUPABASE_URL';
-        const SUPABASE_ANON_KEY = 'ضع_مفتاح_ANON_KEY_هنا';
-        
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+         const URL = "https://iuokwfigwuebutctaxli.supabase.co";
+        const KEY = "sb_publishable_BWoVwRtLPrIXzUNqembCtA_P7To3GW-";
+        const supabaseClient = supabase.createClient(URL, KEY);
         let allLogs = [];
         let typeChartInstance = null;
         let routerChartInstance = null;
