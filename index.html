@@ -26,7 +26,69 @@
         }
     </script>
 </head>
-<body class="bg-darkBg text-slate-100 min-h-screen font-sans antialiased">
+<body class="bg-darkBg text-slate-100 min-h-screen font-sans antialiased relative">
+
+    <!-- TOAST NOTIFICATION CONTAINER (للإشعارات الفورية) -->
+    <div id="toastContainer" class="fixed top-5 left-5 z-50 flex flex-col gap-3 max-w-sm w-full pointer-events-none"></div>
+
+    <!-- FLOATING FEATURE BUTTON (زر الميزات في الزاوية) -->
+    <button onclick="openFeaturesModal()" class="fixed bottom-6 left-6 z-40 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white p-4 rounded-full shadow-2xl flex items-center justify-center transition-all transform hover:scale-110 border border-blue-400/30 group" title="ماذا قدمنا في Ebda3 Net؟">
+        <i class="fa-solid fa-wand-magic-sparkles text-xl animate-pulse"></i>
+        <span class="absolute left-16 bg-slate-900 text-slate-200 text-xs px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-slate-700 shadow-xl pointer-events-none">✨ ميزات النظام وقصة الإنجاز</span>
+    </button>
+
+    <!-- FEATURES MODAL (نافذة عرض الميزات والإنجازات) -->
+    <div id="featuresModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-cardBg border border-slate-700 rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative overflow-hidden max-h-[90vh] flex flex-col">
+            <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-500 via-purple-500 to-rose-500"></div>
+            
+            <div class="flex items-center justify-between pb-4 border-b border-slate-800 mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg">رحلة بناء لوحة تحكم Ebda3 Net</h3>
+                        <p class="text-xs text-slate-400">ملخص التطورات والخصائص البرمجية للنظام</p>
+                    </div>
+                </div>
+                <button onclick="closeFeaturesModal()" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition-colors">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="overflow-y-auto space-y-4 pr-1 text-sm text-slate-300 leading-relaxed flex-1">
+                <div class="p-3 bg-slate-900/50 rounded-xl border border-slate-800">
+                    <h4 class="font-bold text-blue-400 mb-1 flex items-center gap-2"><i class="fa-solid fa-check"></i> الهيكل الأساسي وتصميم الواجهة</h4>
+                    <p class="text-xs text-slate-400">تم تصميم لوحة تحكم عصرية متجاوبة بالكامل لشبكة **Ebda3 Net** مع شاشة تسجيل دخول مربوطة بقاعدة بيانات Supabase، شريط علوي احترافي، وإحصائيات عامة لأجهزة الراوتر والسجلات والمستخدمين.</p>
+                </div>
+
+                <div class="p-3 bg-slate-900/50 rounded-xl border border-slate-800">
+                    <h4 class="font-bold text-emerald-400 mb-1 flex items-center gap-2"><i class="fa-solid fa-check"></i> الرسوم البيانية التفاعلية المترابطة</h4>
+                    <p class="text-xs text-slate-400">إضافة رسوم بيانية دائرية وعمودية (Doughnut & Bar Charts) لأنواع السجلات وأنشطة أجهزة الراوتر، مع ميزة تفاعلية: النقر على أي عمود أو قسم يقوم بفلترة الداشبورد بالكامل فوراً!</p>
+                </div>
+
+                <div class="p-3 bg-slate-900/50 rounded-xl border border-slate-800">
+                    <h4 class="font-bold text-purple-400 mb-1 flex items-center gap-2"><i class="fa-solid fa-check"></i> كارت التحليلات الذكية والتصدير</h4>
+                    <p class="text-xs text-slate-400">إضافة كارت تحليلي ذكي يحدد بذكاء **أكثر مشكلة تكراراً** و**أكثر مستخدم عانى من الفصل والاتصال**، مع زر لتصدير السجلات إلى ملف Excel (CSV) بضغطة زر وتصاميم مخصصة للنصوص الطويلة.</p>
+                </div>
+
+                <div class="p-3 bg-slate-900/50 rounded-xl border border-slate-800">
+                    <h4 class="font-bold text-rose-400 mb-1 flex items-center gap-2"><i class="fa-solid fa-check"></i> نظام التنبيهات الفورية (Live Alerts & Realtime)</h4>
+                    <p class="text-xs text-slate-400">ربط النظام بخدمة Supabase Realtime، بحيث يتم فحص السجلات الجديدة لحظياً، وإطلاق تنبيه عائم ملون إذا فصل أي مستخدم 3 مرات أو أكثر خلال الساعة الأخيرة!</p>
+                </div>
+
+                <div class="p-4 bg-gradient-to-r from-blue-900/20 to-purple-900/20 rounded-xl border border-purple-500/30 text-center mt-4">
+                    <h4 class="font-bold text-amber-400 text-base mb-1">🔥 القادم أعظم!</h4>
+                    <p class="text-xs text-slate-300">الشبكة حالياً تحت سيطرتك الكاملة.. تخيل لو ربطنا الراوتر يطلع يعمل قهوة للمشتركين لما يضعف النت! جاهز لأي تعديل جديد؟</p>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-800 mt-4 flex justify-end">
+                <button onclick="closeFeaturesModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-medium transition-colors">إغلاق</button>
+            </div>
+        </div>
+    </div>
 
     <!-- LOGIN SECTION -->
     <div id="loginSection" class="flex items-center justify-center min-h-screen px-4">
@@ -125,7 +187,6 @@
                         <h3 class="text-xl font-bold mt-0.5" id="totalUsers">0</h3>
                     </div>
                 </div>
-                <!-- كارت التحليلات الجديد (أكثر مشكلة شيوعاً وأكثر فصل/اتصال) -->
                 <div class="bg-cardBg border border-slate-800 p-4 rounded-2xl flex items-center gap-4 shadow-sm">
                     <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center text-lg">
                         <i class="fa-solid fa-triangle-exclamation"></i>
@@ -208,7 +269,7 @@
 
     <!-- SCRIPT LOGIC -->
     <script>
-      const SUPABASE_URL = "https://iuokwfigwuebutctaxli.supabase.co";
+     const SUPABASE_URL = "https://iuokwfigwuebutctaxli.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_BWoVwRtLPrIXzUNqembCtA_P7To3GW-";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         let allLogs = [];
@@ -224,6 +285,15 @@
                 showDashboard();
             }
         });
+
+        // دوال فتح وإغلاق نافذة الميزات
+        function openFeaturesModal() {
+            document.getElementById('featuresModal').classList.remove('hidden');
+        }
+
+        function closeFeaturesModal() {
+            document.getElementById('featuresModal').classList.add('hidden');
+        }
 
         async function handleLogin(e) {
             e.preventDefault();
@@ -262,13 +332,13 @@
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('dashboardSection').classList.remove('hidden');
             fetchLogs();
+            initRealtimeSubscription();
         }
 
         function handleLogout() {
             localStorage.removeItem('mikrotik_logged_in');
             localStorage.removeItem('mikrotik_username');
             document.getElementById('dashboardSection').classList.add('hidden');
-            document.getElementById('loginSection').classList.add('hidden'); // Fix toggle
             document.getElementById('loginSection').classList.remove('hidden');
             document.getElementById('loginForm').reset();
         }
@@ -295,6 +365,57 @@
             }
         }
 
+        function initRealtimeSubscription() {
+            supabaseClient
+                .channel('public:network_logs')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'network_logs' }, payload => {
+                    const newLog = payload.new;
+                    allLogs.unshift(newLog);
+                    applyFilters();
+                    updateCharts(allLogs);
+                    checkUserDisconnectThreshold(newLog);
+                })
+                .subscribe();
+        }
+
+        function checkUserDisconnectThreshold(incomingLog) {
+            if (!incomingLog.username) return;
+
+            const username = incomingLog.username;
+            const oneHourAgo = new Date(new Date().getTime() - (60 * 60 * 1000));
+
+            const userRecentLogs = allLogs.filter(log => {
+                if (!log.created_at || log.username !== username) return false;
+                const logTime = new Date(log.created_at);
+                return logTime >= oneHourAgo;
+            });
+
+            if (userRecentLogs.length >= 3) {
+                showToastNotification(`تنبيه هام: المستخدم (${username}) فصل واتصل 3 مرات أو أكثر خلال الساعة الأخيرة!`);
+            }
+        }
+
+        function showToastNotification(message) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = "pointer-events-auto bg-rose-600/90 text-white p-4 rounded-xl shadow-2xl border border-rose-500 flex items-start gap-3 backdrop-blur-md transition-all transform translate-y-2 opacity-0";
+            toast.innerHTML = `
+                <div class="text-xl mt-0.5"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div class="flex-1 text-xs leading-relaxed font-medium">${message}</div>
+                <button onclick="this.parentElement.remove()" class="text-white/80 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            `;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 50);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 8000);
+        }
+
         function renderLogs(logs) {
             const tbody = document.getElementById('logsTableBody');
             if (logs.length === 0) {
@@ -319,7 +440,6 @@
             }).join('');
         }
 
-        // تحديث جميع الإحصائيات والكاردات بناءً على البيانات المُفلترة
         function updateStats(logs) {
             document.getElementById('totalLogs').innerText = logs.length;
             
@@ -329,25 +449,18 @@
             const uniqueUsers = [...new Set(logs.map(l => l.username).filter(Boolean))];
             document.getElementById('totalUsers').innerText = uniqueUsers.length;
 
-            // حساب أكثر مشكلة شيوعاً (بناءً على Topics أو Log Type أو نص الرسالة)
             const problemCounts = {};
             const disconnectUserCounts = {};
 
             logs.forEach(log => {
-                // تجميع المشاكل (نعتمد على topics أو log_type كمؤشر للمشكلة)
                 const prob = log.topics || log.log_type || 'غير مصنف';
                 problemCounts[prob] = (problemCounts[prob] || 0) + 1;
 
-                // رصد حالات الفصل والاتصال أو أصحاب تكرار السجلات (Disconnect/Connect/Login/Logout)
-                const msg = (log.message || '').toLowerCase();
-                const isDisconnectRelated = msg.includes('disconnect') || msg.includes('down') || msg.includes('logged out') || msg.includes('timeout') || (log.log_type && log.log_type.toLowerCase().includes('disconnect'));
-                
                 if (log.username) {
                     disconnectUserCounts[log.username] = (disconnectUserCounts[log.username] || 0) + 1;
                 }
             });
 
-            // إيجاد أكثر مشكلة تكراراً
             let topProbText = 'لا توجد بيانات';
             let maxProbCount = 0;
             for (const [prob, count] of Object.entries(problemCounts)) {
@@ -359,7 +472,6 @@
             document.getElementById('topProblem').innerText = topProbText;
             document.getElementById('topProblem').title = topProbText;
 
-            // إيجاد أكثر يوزر تكررت لديه الأحداث / الفصل
             let topUserText = 'لا توجد بيانات';
             let maxUserCount = 0;
             for (const [user, count] of Object.entries(disconnectUserCounts)) {
@@ -444,7 +556,6 @@
             });
         }
 
-        // فلترة متكاملة تتأثر بها الجداول والإحصائيات والكارت الجديد فوراً
         function applyFilters() {
             const query = document.getElementById('searchInput').value.toLowerCase();
             const startDate = document.getElementById('startDate').value;
@@ -472,7 +583,7 @@
             });
 
             renderLogs(filtered);
-            updateStats(filtered); // تحديث الكاردات بناءً على النتائج المفلترة فقط
+            updateStats(filtered);
         }
 
         function resetFilters() {
