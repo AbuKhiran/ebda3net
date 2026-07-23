@@ -11,7 +11,7 @@
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Chart.js للرسوم البيانية -->
-    <script src="https://cdn.jsdelivr.net/npm/Chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -59,8 +59,12 @@
 
             <div class="overflow-y-auto space-y-4 pr-1 text-sm text-slate-300 leading-relaxed flex-1">
                 <div class="p-3 bg-slate-900/50 rounded-xl border border-slate-800">
-                    <h4 class="font-bold text-rose-400 mb-1 flex items-center gap-2"><i class="fa-solid fa-check"></i> جدول المشتركين غير المتصلين (محدث 🔥)</h4>
-                    <p class="text-xs text-slate-400">يعرض فقط المشتركين غير المتصلين حالياً مع وقت آخر اتصال في عمودين مرتبين بشكل جمالي، ويتم إزالة المشترك فور عودته للاتصال.</p>
+                    <h4 class="font-bold text-rose-400 mb-1 flex items-center gap-2"><i class="fa-solid fa-check"></i> 1. عداد زمن الانقطاع الحي (Downtime Duration Counter)</h4>
+                    <p class="text-xs text-slate-400">بطاقات المشتركين غير المتصلين تعرض الآن بوضوح كم مضى من الوقت بالدقائق والساعات منذ لحظة انقطاعهم عن الشبكة.</p>
+                </div>
+                <div class="p-3 bg-slate-900/50 rounded-xl border border-slate-800">
+                    <h4 class="font-bold text-emerald-400 mb-1 flex items-center gap-2"><i class="fa-solid fa-check"></i> 2. الخريطة الحرارية لساعات الذروة (Peak Hours Heatmap)</h4>
+                    <p class="text-xs text-slate-400">رسم بياني تحليلي يوضح بدقة في أي ساعات من اليوم يحدث أكبر ضغط أو انقطاع في الشبكة لمساعدة الإدارة.</p>
                 </div>
             </div>
 
@@ -238,23 +242,37 @@
                 </div>
             </div>
 
-            <!-- Charts Section -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Charts Section (مع إضافة خريطة ساعات الذروة والرسوم البيانية المصححة) -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="bg-cardBg border border-slate-800 p-5 rounded-2xl shadow-sm">
-                    <h3 class="text-sm font-semibold text-slate-300 mb-4"><i class="fa-solid fa-chart-pie ml-2 text-blue-400"></i>توزيع أنواع السجلات (اضغط للفلترة)</h3>
-                    <div class="h-60 flex items-center justify-center">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-semibold text-slate-300"><i class="fa-solid fa-chart-pie ml-2 text-blue-400"></i>توزيع السجلات</h3>
+                        <button onclick="resetChartFilter('type')" class="text-[10px] text-blue-400 hover:underline">إلغاء الفلتر</button>
+                    </div>
+                    <div class="h-60 flex items-center justify-center relative">
                         <canvas id="logTypeChart"></canvas>
                     </div>
                 </div>
                 <div class="bg-cardBg border border-slate-800 p-5 rounded-2xl shadow-sm">
-                    <h3 class="text-sm font-semibold text-slate-300 mb-4"><i class="fa-solid fa-chart-line ml-2 text-emerald-400"></i>نشاط أجهزة الراوتر (اضغط للفلترة)</h3>
-                    <div class="h-60 flex items-center justify-center">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-semibold text-slate-300"><i class="fa-solid fa-chart-line ml-2 text-emerald-400"></i>نشاط الراوترات</h3>
+                        <button onclick="resetChartFilter('router')" class="text-[10px] text-blue-400 hover:underline">إلغاء الفلتر</button>
+                    </div>
+                    <div class="h-60 flex items-center justify-center relative">
                         <canvas id="routerChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-cardBg border border-slate-800 p-5 rounded-2xl shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-semibold text-slate-300"><i class="fa-solid fa-fire ml-2 text-amber-400"></i>خريطة حرارة ساعات الذروة</h3>
+                    </div>
+                    <div class="h-60 flex items-center justify-center relative">
+                        <canvas id="heatmapChart"></canvas>
                     </div>
                 </div>
             </div>
 
-            <!-- Disconnected Users Status Card (المشتركين غير المتصلين فقط) -->
+            <!-- Disconnected Users Status Card (مع عداد زمن الانقطاع الحي وعمودين لكل بطاقة) -->
             <div class="bg-cardBg border border-slate-800 p-5 rounded-2xl shadow-sm">
                 <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-800">
                     <div class="flex items-center gap-2">
@@ -262,8 +280,8 @@
                             <i class="fa-solid fa-user-slash text-sm"></i>
                         </div>
                         <div>
-                            <h3 class="text-sm font-semibold text-slate-200">المشتركين غير المتصلين حالياً</h3>
-                            <p class="text-[11px] text-slate-400">يعرض فقط المشتركين الذين فصلوا ولم يعودوا للاتصال</p>
+                            <h3 class="text-sm font-semibold text-slate-200">المشتركين غير المتصلين حالياً (مع عداد زمن الانقطاع)</h3>
+                            <p class="text-[11px] text-slate-400">يعرض اسم المشترك ومدة الانقطاع بالدقيقة، ويختفي تلقائياً فور اتصاله</p>
                         </div>
                     </div>
                     <span id="disconnectedCountBadge" class="px-2.5 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-full text-xs font-bold">0 غير متصل</span>
@@ -335,12 +353,14 @@
 
     <!-- SCRIPT LOGIC -->
     <script>
-        const SUPABASE_URL = "https://iuokwfigwuebutctaxli.supabase.co";
+      const SUPABASE_URL = "https://iuokwfigwuebutctaxli.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_BWoVwRtLPrIXzUNqembCtA_P7To3GW-";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         let allLogs = [];
         let typeChartInstance = null;
         let routerChartInstance = null;
+        let heatmapChartInstance = null;
+        let downtimeIntervalTimer = null;
 
         let activeLogTypeFilter = null;
         let activeRouterFilter = null;
@@ -355,6 +375,11 @@
             if (session === 'true') {
                 showDashboard();
             }
+
+            // تحديث عداد زمن الانقطاع كل دقيقة تلقائياً
+            downtimeIntervalTimer = setInterval(() => {
+                if(allLogs.length > 0) updateDisconnectedUsersTable(allLogs);
+            }, 60000);
         });
 
         function setDefaultDatesToToday() {
@@ -374,6 +399,13 @@
             activeLogTypeFilter = null;
             activeRouterFilter = null;
             applyFilters();
+        }
+
+        function resetChartFilter(type) {
+            if (type === 'type') activeLogTypeFilter = null;
+            if (type === 'router') activeRouterFilter = null;
+            applyFilters();
+            updateCharts(allLogs);
         }
 
         function openFeaturesModal() {
@@ -434,7 +466,7 @@
                          `⚠️ المشكلة الأكثر تكراراً: ${topProb}\n` +
                          `📶 اليوزر الأكثر اضطراباً: ${topUser}\n` +
                          `------------------------------------\n` +
-                         `💡 حالة الشبكة مستقرة وتحت السيطرة.`;
+                         `💡 مع ميزة عداد الانقطاع والحرارة، الشبكة تحت المراقبة اللحظية.`;
 
             document.getElementById('summaryContent').innerText = text;
         }
@@ -481,7 +513,7 @@
         window.addEventListener('click', function(e) {
             const dropdown = document.getElementById('notifDropdown');
             const bellBtn = dropdown.previousElementSibling;
-            if (!dropdown.contains(e.target) && !bellBtn.contains(e.target)) {
+            if (bellBtn && !dropdown.contains(e.target) && !bellBtn.contains(e.target)) {
                 dropdown.classList.add('hidden');
             }
         });
@@ -610,19 +642,31 @@
                 .subscribe();
         }
 
+        function calculateDowntimeDuration(timestamp) {
+            const now = new Date();
+            const past = new Date(timestamp);
+            const diffMs = now - past;
+            const diffMins = Math.floor(diffMs / 60000);
+            
+            if (diffMins < 1) return 'منذ أقل من دقيقة';
+            if (diffMins < 60) return `منذ ${diffMins} دقيقة`;
+            
+            const diffHours = Math.floor(diffMins / 60);
+            const remainingMins = diffMins % 60;
+            return `منذ ${diffHours} س و ${remainingMins} د`;
+        }
+
         function updateDisconnectedUsersTable(logs) {
             const container = document.getElementById('usersStatusContainer');
             const badge = document.getElementById('disconnectedCountBadge');
             const userLatestLog = {};
 
-            // الحصول على آخر سجل لكل مستخدم
             logs.forEach(log => {
                 if (log.username && !userLatestLog[log.username]) {
                     userLatestLog[log.username] = log;
                 }
             });
 
-            // تصفية المشتركين غير المتصلين فقط
             const disconnectedUsers = [];
             Object.keys(userLatestLog).forEach(user => {
                 const log = userLatestLog[user];
@@ -633,7 +677,7 @@
                 if (isDisconnected) {
                     disconnectedUsers.push({
                         username: user,
-                        time: new Date(log.created_at).toLocaleString('ar-SA')
+                        downtimeText: calculateDowntimeDuration(log.created_at)
                     });
                 }
             });
@@ -652,15 +696,15 @@
                 return;
             }
 
-            // عرض عمودين فقط لكل مشترك (اسم المشترك، وقت آخر اتصال)
+            // عرض عمودين فقط لكل بطاقة (اسم المشترك، ومدة الانقطاع الحية)
             container.innerHTML = disconnectedUsers.map(item => `
                 <div class="bg-slate-900/60 border border-slate-800/80 p-3 rounded-xl flex items-center justify-between gap-3 shadow-sm hover:border-rose-500/30 transition-all">
                     <div class="flex items-center gap-2.5 truncate">
                         <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse shrink-0"></span>
                         <span class="text-xs font-bold text-slate-200 truncate" title="${item.username}">${item.username}</span>
                     </div>
-                    <div class="text-[11px] font-mono text-slate-400 shrink-0 bg-slate-800/80 px-2 py-1 rounded-md border border-slate-700/50">
-                        ${item.time}
+                    <div class="text-[11px] font-mono text-rose-300 shrink-0 bg-rose-500/10 px-2 py-1 rounded-md border border-rose-500/20">
+                        ${item.downtimeText}
                     </div>
                 </div>
             `).join('');
@@ -793,55 +837,106 @@
 
         function updateCharts(logs) {
             const typeCounts = {}, routerCounts = {};
+            const hourlyCounts = Array(24).fill(0);
+
             logs.forEach(log => {
                 const type = log.log_type || 'General';
                 typeCounts[type] = (typeCounts[type] || 0) + 1;
+
                 const router = log.router_ip || 'Unknown';
                 routerCounts[router] = (routerCounts[router] || 0) + 1;
-            });
 
-            const typeCtx = document.getElementById('logTypeChart').getContext('2d');
-            if (typeChartInstance) typeChartInstance.destroy();
-            typeChartInstance = new Chart(typeCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(typeCounts),
-                    datasets: [{ data: Object.values(typeCounts), backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'], borderWidth: 0 }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8' } } },
-                    onClick: (event, elements) => {
-                        if (elements.length > 0) {
-                            const label = typeChartInstance.data.labels[elements[0].index];
-                            activeLogTypeFilter = (activeLogTypeFilter === label) ? null : label;
-                            applyFilters();
-                        }
-                    }
+                if (log.created_at) {
+                    const hour = new Date(log.created_at).getHours();
+                    hourlyCounts[hour]++;
                 }
             });
 
-            const routerCtx = document.getElementById('routerChart').getContext('2d');
-            if (routerChartInstance) routerChartInstance.destroy();
-            routerChartInstance = new Chart(routerCtx, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(routerCounts),
-                    datasets: [{ label: 'عدد السجلات', data: Object.values(routerCounts), backgroundColor: '#3b82f6', borderRadius: 6 }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    scales: { y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }, x: { ticks: { color: '#94a3b8' }, grid: { display: false } } },
-                    plugins: { legend: { display: false } },
-                    onClick: (event, elements) => {
-                        if (elements.length > 0) {
-                            const label = routerChartInstance.data.labels[elements[0].index];
-                            activeRouterFilter = (activeRouterFilter === label) ? null : label;
-                            applyFilters();
+            // 1. الرسم البياني الدائري (Log Types)
+            const typeCanvas = document.getElementById('logTypeChart');
+            if (typeCanvas) {
+                const typeCtx = typeCanvas.getContext('2d');
+                if (typeChartInstance) typeChartInstance.destroy();
+                typeChartInstance = new Chart(typeCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(typeCounts),
+                        datasets: [{ data: Object.values(typeCounts), backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'], borderWidth: 0 }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 11 } } } },
+                        onClick: (event, elements) => {
+                            if (elements.length > 0) {
+                                const label = typeChartInstance.data.labels[elements[0].index];
+                                activeLogTypeFilter = (activeLogTypeFilter === label) ? null : label;
+                                applyFilters();
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
+
+            // 2. الرسم البياني العمودي (Router Activity)
+            const routerCanvas = document.getElementById('routerChart');
+            if (routerCanvas) {
+                const routerCtx = routerCanvas.getContext('2d');
+                if (routerChartInstance) routerChartInstance.destroy();
+                routerChartInstance = new Chart(routerCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(routerCounts),
+                        datasets: [{ label: 'عدد السجلات', data: Object.values(routerCounts), backgroundColor: '#3b82f6', borderRadius: 6 }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        scales: { 
+                            y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }, 
+                            x: { ticks: { color: '#94a3b8' }, grid: { display: false } } 
+                        },
+                        plugins: { legend: { display: false } },
+                        onClick: (event, elements) => {
+                            if (elements.length > 0) {
+                                const label = routerChartInstance.data.labels[elements[0].index];
+                                activeRouterFilter = (activeRouterFilter === label) ? null : label;
+                                applyFilters();
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 3. خريطة حرارة ساعات الذروة (Peak Hours Heatmap Chart)
+            const heatmapCanvas = document.getElementById('heatmapChart');
+            if (heatmapCanvas) {
+                const heatmapCtx = heatmapCanvas.getContext('2d');
+                if (heatmapChartInstance) heatmapChartInstance.destroy();
+                const hourLabels = Array.from({length: 24}, (_, i) => `${i}:00`);
+                heatmapChartInstance = new Chart(heatmapCtx, {
+                    type: 'line',
+                    data: {
+                        labels: hourLabels,
+                        datasets: [{
+                            label: 'نشاط الساعات',
+                            data: hourlyCounts,
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 3,
+                            pointBackgroundColor: '#f59e0b'
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        scales: { 
+                            y: { ticks: { color: '#94a3b8' }, grid: { color: '#334155' } }, 
+                            x: { ticks: { color: '#94a3b8', font: { size: 9 }, maxTicksLimit: 8 }, grid: { display: false } } 
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
         }
 
         function applyFilters() {
