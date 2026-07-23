@@ -11,7 +11,7 @@
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Chart.js للرسوم البيانية -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/Chart.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -59,12 +59,8 @@
 
             <div class="overflow-y-auto space-y-4 pr-1 text-sm text-slate-300 leading-relaxed flex-1">
                 <div class="p-3 bg-slate-900/50 rounded-xl border border-slate-800">
-                    <h4 class="font-bold text-blue-400 mb-1 flex items-center gap-2"><i class="fa-solid fa-check"></i> العرض الافتراضي ليوم واحد والتحديث التلقائي (محدث 🔥)</h4>
-                    <p class="text-xs text-slate-400">النظام يفتح افتراضياً على بيانات اليوم الحالي فقط، مع تفعيل التحديث التلقائي والملخص اليومي بشكل مباشر.</p>
-                </div>
-                <div class="p-3 bg-slate-900/50 rounded-xl border border-slate-800">
-                    <h4 class="font-bold text-emerald-400 mb-1 flex items-center gap-2"><i class="fa-solid fa-check"></i> جدول حالة المشتركين اللحظية</h4>
-                    <p class="text-xs text-slate-400">مؤشرات بصرية دقيقة (🟢 متصل / 🔴 غير متصل) استناداً إلى أحدث سجل لكل مستخدم في قاعدة البيانات.</p>
+                    <h4 class="font-bold text-rose-400 mb-1 flex items-center gap-2"><i class="fa-solid fa-check"></i> جدول المشتركين غير المتصلين (محدث 🔥)</h4>
+                    <p class="text-xs text-slate-400">يعرض فقط المشتركين غير المتصلين حالياً مع وقت آخر اتصال في عمودين مرتبين بشكل جمالي، ويتم إزالة المشترك فور عودته للاتصال.</p>
                 </div>
             </div>
 
@@ -144,7 +140,6 @@
             </div>
             
             <div class="flex items-center gap-3 flex-wrap">
-                <!-- زر الملخص التنفيذي اليومي -->
                 <button onclick="openSummaryModal()" class="flex items-center gap-2 px-3 py-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 rounded-lg text-xs transition-colors border border-indigo-500/20" title="تقرير الملخص التنفيذي">
                     <i class="fa-solid fa-file-contract"></i>
                     <span class="hidden sm:inline">الملخص التنفيذي</span>
@@ -259,14 +254,23 @@
                 </div>
             </div>
 
-            <!-- Users Status Table (حالة المشتركين اللحظية) -->
+            <!-- Disconnected Users Status Card (المشتركين غير المتصلين فقط) -->
             <div class="bg-cardBg border border-slate-800 p-5 rounded-2xl shadow-sm">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-sm font-semibold text-slate-300 flex items-center gap-2"><i class="fa-solid fa-signal text-emerald-400"></i>حالة المشتركين اللحظية (بناءً على آخر سجل)</h3>
-                    <span class="text-xs text-slate-400">🟢 متصل | 🔴 غير متصل</span>
+                <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-800">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center">
+                            <i class="fa-solid fa-user-slash text-sm"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-semibold text-slate-200">المشتركين غير المتصلين حالياً</h3>
+                            <p class="text-[11px] text-slate-400">يعرض فقط المشتركين الذين فصلوا ولم يعودوا للاتصال</p>
+                        </div>
+                    </div>
+                    <span id="disconnectedCountBadge" class="px-2.5 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-full text-xs font-bold">0 غير متصل</span>
                 </div>
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 max-h-48 overflow-y-auto pr-1" id="usersStatusContainer">
-                    <div class="text-xs text-slate-500 col-span-full text-center py-4">جاري تحميل حالة المستخدمين...</div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-56 overflow-y-auto pr-1" id="usersStatusContainer">
+                    <div class="text-xs text-slate-500 col-span-full text-center py-6">جاري التحقق من حالة المشتركين...</div>
                 </div>
             </div>
 
@@ -345,7 +349,6 @@
         let savedNotifications = [];
 
         window.addEventListener('DOMContentLoaded', () => {
-            // تعيين حقول التاريخ لليوم الحالي افتراضياً عند التحميل
             setDefaultDatesToToday();
 
             const session = localStorage.getItem('mikrotik_logged_in');
@@ -389,7 +392,6 @@
         }
 
         function generateSummaryText() {
-            // التقرير سيعتمد على السجلات المفلترة حالياً (بيانات اليوم فقط افتراضياً)
             const query = document.getElementById('searchInput').value.toLowerCase();
             const selectedUser = document.getElementById('userQuickFilter').value;
             const startDate = document.getElementById('startDate').value;
@@ -551,7 +553,6 @@
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('dashboardSection').classList.remove('hidden');
             
-            // تفعيل التحديث التلقائي افتراضياً عند الدخول
             if (!isAutoRefreshActive) {
                 autoRefreshInterval = setInterval(() => fetchLogs(), 30000);
                 isAutoRefreshActive = true;
@@ -584,7 +585,7 @@
 
                 allLogs = data || [];
                 populateUserDropdown(allLogs);
-                updateUsersStatusTable(allLogs);
+                updateDisconnectedUsersTable(allLogs);
                 applyFilters();
                 updateCharts(allLogs);
             } catch (err) {
@@ -601,7 +602,7 @@
                     const newLog = payload.new;
                     allLogs.unshift(newLog);
                     populateUserDropdown(allLogs);
-                    updateUsersStatusTable(allLogs);
+                    updateDisconnectedUsersTable(allLogs);
                     applyFilters();
                     updateCharts(allLogs);
                     checkUserDisconnectThreshold(newLog);
@@ -609,41 +610,60 @@
                 .subscribe();
         }
 
-        function updateUsersStatusTable(logs) {
+        function updateDisconnectedUsersTable(logs) {
             const container = document.getElementById('usersStatusContainer');
+            const badge = document.getElementById('disconnectedCountBadge');
             const userLatestLog = {};
 
+            // الحصول على آخر سجل لكل مستخدم
             logs.forEach(log => {
                 if (log.username && !userLatestLog[log.username]) {
                     userLatestLog[log.username] = log;
                 }
             });
 
-            const usernames = Object.keys(userLatestLog).sort();
-            if (usernames.length === 0) {
-                container.innerHTML = `<div class="text-xs text-slate-500 col-span-full text-center py-4">لا توجد مستخدمين مسجلين</div>`;
-                return;
-            }
-
-            container.innerHTML = usernames.map(user => {
+            // تصفية المشتركين غير المتصلين فقط
+            const disconnectedUsers = [];
+            Object.keys(userLatestLog).forEach(user => {
                 const log = userLatestLog[user];
                 const msg = (log.message || '').toLowerCase();
                 const type = (log.log_type || '').toLowerCase();
                 const isDisconnected = msg.includes('disconnect') || msg.includes('down') || msg.includes('فصل') || type.includes('error');
                 
-                const dotColor = isDisconnected ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500';
-                const statusText = isDisconnected ? 'غير متصل' : 'متصل';
+                if (isDisconnected) {
+                    disconnectedUsers.push({
+                        username: user,
+                        time: new Date(log.created_at).toLocaleString('ar-SA')
+                    });
+                }
+            });
 
-                return `
-                    <div class="bg-slate-900/60 border border-slate-800/80 p-2.5 rounded-xl flex items-center justify-between gap-2 shadow-sm">
-                        <div class="flex items-center gap-2 truncate">
-                            <span class="w-2.5 h-2.5 rounded-full ${dotColor} shrink-0"></span>
-                            <span class="text-xs font-medium text-slate-200 truncate" title="${user}">${user}</span>
+            badge.innerText = `${disconnectedUsers.length} غير متصل`;
+
+            if (disconnectedUsers.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full py-8 text-center flex flex-col items-center justify-center gap-2">
+                        <div class="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-check"></i>
                         </div>
-                        <span class="text-[10px] text-slate-400 shrink-0">${statusText}</span>
+                        <p class="text-xs text-slate-400 font-medium">رائع! جميع المشتركين متصلون حالياً ولا توجد حالات انقطاع مسجلة.</p>
                     </div>
                 `;
-            }).join('');
+                return;
+            }
+
+            // عرض عمودين فقط لكل مشترك (اسم المشترك، وقت آخر اتصال)
+            container.innerHTML = disconnectedUsers.map(item => `
+                <div class="bg-slate-900/60 border border-slate-800/80 p-3 rounded-xl flex items-center justify-between gap-3 shadow-sm hover:border-rose-500/30 transition-all">
+                    <div class="flex items-center gap-2.5 truncate">
+                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse shrink-0"></span>
+                        <span class="text-xs font-bold text-slate-200 truncate" title="${item.username}">${item.username}</span>
+                    </div>
+                    <div class="text-[11px] font-mono text-slate-400 shrink-0 bg-slate-800/80 px-2 py-1 rounded-md border border-slate-700/50">
+                        ${item.time}
+                    </div>
+                </div>
+            `).join('');
         }
 
         function playAlertSound() {
