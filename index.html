@@ -15,7 +15,6 @@
         .hover-scale { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .hover-scale:hover { transform: translateY(-3px); }
 
-        /* حركة الشريط الإخباري للأخبار والإعلانات */
         @keyframes ticker {
             0% { transform: translateX(0); }
             100% { transform: translateX(50%); }
@@ -59,15 +58,15 @@
     <i class="fa-solid fa-wand-magic-sparkles bg-icon" style="top: 60%; left: 8%; animation-delay: 3s;"></i>
     <i class="fa-solid fa-box-open bg-icon" style="top: 80%; right: 7%; animation-delay: 4.5s;"></i>
 
-    <!-- شريط الإعلانات المتحرك (Breaking News Ticker) في أعلى الصفحة -->
+    <!-- شريط الإعلانات المتحرك (Breaking News Ticker) -->
     <div class="bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 text-white py-2.5 px-4 overflow-hidden border-b border-emerald-800/40 shadow-md relative z-30 flex items-center">
         <div class="max-w-7xl mx-auto w-full flex items-center gap-3">
             <div class="bg-emerald-600 text-white px-3 py-1 rounded-xl text-xs font-black tracking-wider flex items-center gap-1.5 shrink-0 shadow-sm">
-                <i class="fa-solid fa-bullhorn animate-bounce"></i> تزيين وتنبيهات
+                <i class="fa-solid fa-bullhorn animate-bounce"></i> إعلانات وعروض
             </div>
             <div class="overflow-hidden whitespace-nowrap flex-grow relative">
                 <div id="ticker-container" class="inline-block text-xs sm:text-sm font-bold text-emerald-100 tracking-wide">
-                    جاري تحميل أحدث الإعلانات والعروض...
+                    جاري تحميل أحدث الإعلانات والتنبيهات...
                 </div>
             </div>
         </div>
@@ -103,11 +102,74 @@
         </div>
     </div>
 
+    <!-- نافذة نبذة عن Nour Tracking System وتواصل معنا (جميلة ومتجاوبة) -->
+    <div id="about-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-xl w-full p-6 sm:p-8 space-y-6 border border-slate-200 relative max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-200 pb-3">
+                <h3 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info text-emerald-700"></i> نبذة عن Nour Tracking System
+                </h3>
+                <button onclick="closeAboutModal()" class="text-slate-400 hover:text-slate-700 cursor-pointer text-xl font-bold"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="space-y-4 text-xs sm:text-sm text-slate-700 leading-relaxed font-bold">
+                <p>
+                    مرحباً بك في نظام <b>Nour Tracking</b> المتخصص في إدارة شحنات المتاجر العالمية وتتبع طلبيات الزبائن بكل دقة واحترافية. نهدف دائماً إلى تقديم أسرع وأفضل خدمة توصيل لطلبياتكم مع متابعة مستمرة لمواعيد وصول الشحنات.
+                </p>
+
+                <!-- إحصائيات النظام العامة (بدون مبالغ مالية) -->
+                <div class="bg-emerald-50/70 border border-emerald-200 p-4 rounded-2xl space-y-3">
+                    <h4 class="font-black text-emerald-900 text-xs sm:text-sm flex items-center gap-1.5">
+                        <i class="fa-solid fa-chart-line text-emerald-700"></i> إحصائيات وإنجازات النظام بالأرقام:
+                    </h4>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                        <div class="bg-white p-3 rounded-xl border border-emerald-100 shadow-sm">
+                            <span class="block text-[10px] text-slate-500 font-bold">إجمالي الشحنات</span>
+                            <span id="stats-shipments" class="text-base font-black text-emerald-800">0</span>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-emerald-100 shadow-sm">
+                            <span class="block text-[10px] text-slate-500 font-bold">إجمالي الطلبيات</span>
+                            <span id="stats-orders" class="text-base font-black text-emerald-800">0</span>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-emerald-100 shadow-sm">
+                            <span class="block text-[10px] text-slate-500 font-bold">زبائننا الكرام</span>
+                            <span id="stats-clients" class="text-base font-black text-emerald-800">0</span>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-emerald-100 shadow-sm">
+                            <span class="block text-[10px] text-slate-500 font-bold">متوسط التوصيل</span>
+                            <span id="stats-duration" class="text-base font-black text-indigo-700">0 يوم</span>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-emerald-950 font-bold text-center pt-1">
+                        🚚 نتميز بسرعة التوصيل والالتزام التام بالمواعيد ودون أي تأخير يُذكر!
+                    </p>
+                </div>
+
+                <!-- تواصل معنا -->
+                <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-2 text-center">
+                    <h4 class="font-black text-slate-900 text-xs sm:text-sm flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-headset text-emerald-700"></i> تواصل معنا مباشرة للإدارة:
+                    </h4>
+                    <p class="text-xs text-slate-600">يمكنك التواصل معنا عبر تطبيق واتساب في أي وقت للاستفسار عن طلبيتك:</p>
+                    <div id="contact-whatsapp-btn-container" class="pt-1">
+                        <a id="admin-whatsapp-link" href="#" target="_blank" class="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl font-black text-xs transition shadow-md hover-scale">
+                            <i class="fa-brands fa-whatsapp text-sm"></i> مراسلة الإدارة عبر واتساب
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-200 flex justify-end">
+                <button onclick="closeAboutModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-5 py-2 rounded-xl text-xs font-black cursor-pointer transition">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
     <!-- واجهة الزبائن الرئيسية (بوابة الاستعلام المتجاوبة والمميزة) -->
     <div id="client-portal-view" class="w-full flex-grow flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 relative z-10 my-auto">
         <div class="max-w-2xl w-full bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl p-6 sm:p-10 border border-slate-200/80 space-y-6 custom-shadow relative my-4">
             
-            <!-- زر دخول الإدارة البارز والواضح تماماً -->
+            <!-- زر دخول الإدارة البارز -->
             <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 z-20">
                 <button onclick="openLoginModal()" class="bg-emerald-700 hover:bg-emerald-800 text-white px-6 py-2.5 rounded-full shadow-lg shadow-emerald-700/30 flex items-center gap-2 text-xs font-black transition cursor-pointer hover-scale border-2 border-white whitespace-nowrap">
                     <i class="fa-solid fa-lock text-xs"></i> دخول لوحة الإدارة
@@ -120,7 +182,17 @@
                     <i class="fa-solid fa-boxes-stacked"></i>
                 </div>
                 <h1 class="text-2xl sm:text-4xl font-black text-slate-900 tracking-wide bg-gradient-to-r from-emerald-800 to-teal-700 bg-clip-text text-transparent">Nour Tracking System</h1>
-                <p class="text-xs sm:text-sm text-slate-600 font-bold max-w-md mx-auto leading-relaxed">بوابتك الذكية لتتبع الطلبيات، مواعيد الوصول، حسابات الشحن والفواتير الرسمية بكل سهولة وسرعة من أي جهاز.</p>
+                <p class="text-xs sm:text-sm text-slate-600 font-bold max-w-md mx-auto leading-relaxed">بوابتك الذكية لتتبع الطلبيات، مواعيد الوصول، وفواتير الشحن بكل سهولة وسرعة.</p>
+                
+                <!-- أزرار نبذة عنا وتواصل معنا (مطلوبة) -->
+                <div class="flex flex-wrap items-center justify-center gap-2.5 pt-2">
+                    <button onclick="openAboutModal()" class="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300 rounded-2xl text-xs font-black transition cursor-pointer flex items-center gap-1.5 hover-scale">
+                        <i class="fa-solid fa-circle-info text-emerald-700"></i> نبذة عن Nour Tracking System
+                    </button>
+                    <button onclick="openAboutModal()" class="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-300 rounded-2xl text-xs font-black transition cursor-pointer flex items-center gap-1.5 hover-scale">
+                        <i class="fa-solid fa-headset text-indigo-700"></i> تواصل معنا
+                    </button>
+                </div>
             </div>
 
             <!-- حقل البحث برقم الهاتف -->
@@ -310,7 +382,7 @@
                 </button>
             </div>
 
-            <!-- 1. الشحنات الرئيسية -->
+            <!-- أقسام لوحة الإدارة (الشحنات، الطلبيات، الزبائن، الإعلانات، المواقع، الإيميلات، المصاريف، السجلات) -->
             <div id="section-shipments" class="space-y-4">
                 <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="p-4 sm:p-5 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-3">
@@ -340,7 +412,7 @@
                 </div>
             </div>
 
-            <!-- 2. طلبيات الزبائن -->
+            <!-- طلبيات الزبائن -->
             <div id="section-orders" class="space-y-4 hidden">
                 <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="p-4 sm:p-5 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-3">
@@ -373,7 +445,7 @@
                 </div>
             </div>
 
-            <!-- 3. الزبائن وملاحظات الإدارة لهم -->
+            <!-- الزبائن -->
             <div id="section-clients" class="space-y-4 hidden">
                 <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="p-4 sm:p-5 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-3">
@@ -403,7 +475,7 @@
                 </div>
             </div>
 
-            <!-- قسم إدارة الإعلانات في لوحة التحكم -->
+            <!-- الإعلانات -->
             <div id="section-announcements" class="space-y-4 hidden">
                 <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="p-4 sm:p-5 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-3">
@@ -426,7 +498,7 @@
                 </div>
             </div>
 
-            <!-- 4. مواقع الشراء -->
+            <!-- مواقع الشراء -->
             <div id="section-websites" class="space-y-4 hidden">
                 <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="p-4 sm:p-5 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-3">
@@ -452,7 +524,7 @@
                 </div>
             </div>
 
-            <!-- 5. إيميلات الشراء -->
+            <!-- إيميلات الشراء -->
             <div id="section-emails" class="space-y-4 hidden">
                 <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="p-4 sm:p-5 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-3">
@@ -480,7 +552,7 @@
                 </div>
             </div>
 
-            <!-- 6. المصاريف -->
+            <!-- المصاريف -->
             <div id="section-expenses" class="space-y-4 hidden">
                 <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="p-4 sm:p-5 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-3">
@@ -508,7 +580,7 @@
                 </div>
             </div>
 
-            <!-- 7. سجل الحركات -->
+            <!-- سجل الحركات -->
             <div id="section-logs" class="space-y-4 hidden">
                 <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="p-4 sm:p-5 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-3">
@@ -553,7 +625,7 @@
         </div>
     </div>
 
-    <!-- مودال إضافة / تعديل إعلان -->
+    <!-- مودال إضافة إعلان -->
     <div id="announcement-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 space-y-4 border border-slate-200">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
@@ -671,7 +743,7 @@
         </div>
     </footer>
 
-    <!-- المودالات الأساسية لإدارة الشحنات والطلبيات والزبائن -->
+    <!-- المودالات الأساسية للشحنات والطلبيات والزبائن والمواقع والإيميلات والمصاريف -->
     <div id="shipment-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 space-y-4 border border-slate-200">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
@@ -801,7 +873,7 @@
         </div>
     </div>
 
-    <!-- مودال زبون (مع ملاحظات الإدارة) -->
+    <!-- مودال زبون -->
     <div id="client-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 space-y-4 border border-slate-200">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
@@ -834,7 +906,7 @@
         </div>
     </div>
 
-    <!-- مودال تفاصيل زبون للإدارة -->
+    <!-- مودال تفاصيل زبون -->
     <div id="client-details-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-3xl shadow-2xl max-w-3xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto border border-slate-200">
             <div class="flex justify-between items-center border-b border-slate-100 pb-3">
@@ -944,7 +1016,7 @@
         </div>
     </div>
 
-    <!-- الجافاسكريبت والمنطق -->
+    <!-- الجافاسكريبت والمنطق الآمن -->
     <script>
         const SUPABASE_URL = "https://xjgxuwphpyzeqeacyshp.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_wb8bUw9HTSQteDeaxMwF1g_qisXRsgA";
@@ -958,6 +1030,7 @@
         let expensesData = [];
         let logsData = [];
         let announcementsData = [];
+        let adminContactPhone = "972500000000";
 
         let startDateFilter = null;
         let endDateFilter = null;
@@ -982,12 +1055,13 @@
 
         async function fetchPublicDataOnly() {
             if (!supabaseClient) return;
-            const [webRes, clientsRes, ordersRes, shipRes, annRes] = await Promise.all([
+            const [webRes, clientsRes, ordersRes, shipRes, annRes, settingsRes] = await Promise.all([
                 supabaseClient.from('websites').select('*'),
                 supabaseClient.from('clients').select('*'),
                 supabaseClient.from('orders').select('*'),
                 supabaseClient.from('shipments').select('*'),
-                supabaseClient.from('public_announcements').select('*').order('created_at', { ascending: false })
+                supabaseClient.from('public_announcements').select('*').order('created_at', { ascending: false }),
+                supabaseClient.from('system_settings').select('*')
             ]);
             websitesData = webRes.data || [];
             clientsData = clientsRes.data || [];
@@ -995,8 +1069,46 @@
             shipmentsData = shipRes.data || [];
             announcementsData = annRes.data || [];
 
+            const settings = settingsRes.data || [];
+            const phoneSetting = settings.find(s => s.setting_key === 'admin_contact_phone');
+            if (phoneSetting) {
+                adminContactPhone = phoneSetting.setting_value;
+            }
+
             renderPublicWebsitesIcons();
             renderTickerAnnouncements();
+            updateAboutModalStats();
+        }
+
+        function updateAboutModalStats() {
+            document.getElementById('stats-shipments').textContent = shipmentsData.length;
+            document.getElementById('stats-orders').textContent = ordersData.filter(o => !o.is_returned).length;
+            document.getElementById('stats-clients').textContent = clientsData.length;
+
+            let totalDays = 0;
+            let count = 0;
+            shipmentsData.forEach(s => {
+                if (s.order_date && s.date) {
+                    const diff = Math.ceil((new Date(s.date) - new Date(s.order_date)) / (1000 * 60 * 60 * 24));
+                    if (diff >= 0) { totalDays += diff; count++; }
+                }
+            });
+            const avg = count > 0 ? Math.round(totalDays / count) : 0;
+            document.getElementById('stats-duration').textContent = `${avg} يوم`;
+
+            let cleanPhone = adminContactPhone.trim();
+            if (cleanPhone.startsWith('0')) cleanPhone = '972' + cleanPhone.substring(1);
+            const waLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent('مرحباً إدارة Nour Tracking، أود الاستفسار عن طلبيتي.')}`;
+            document.getElementById('admin-whatsapp-link').href = waLink;
+        }
+
+        function openAboutModal() {
+            updateAboutModalStats();
+            document.getElementById('about-modal').classList.remove('hidden');
+        }
+
+        function closeAboutModal() {
+            document.getElementById('about-modal').classList.add('hidden');
         }
 
         function renderPublicWebsitesIcons() {
@@ -1023,7 +1135,7 @@
             const container = document.getElementById('ticker-container');
             const activeAnnouncements = announcementsData.filter(a => a.is_active);
             if (activeAnnouncements.length === 0) {
-                if(container) container.innerHTML = `<span>🌸 أهلاً بكم في نظام Nour Tracking لتتبع الطلبيات والشحنات.</span>`;
+                if(container) container.innerHTML = `<span>🌸 أهلاً بكم في نظام Nour Tracking لتتبع الطلبيات والشحنات بدقة وسرعة.</span>`;
                 return;
             }
             const tickerText = activeAnnouncements.map(a => `📢 &nbsp; <b>${a.title}:</b> ${a.content} &nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;`).join('');
@@ -1088,7 +1200,7 @@
                                         <div class="flex justify-between items-center pt-1 border-t border-slate-200 font-bold">
                                             <span>حالة الدفع: <span class="${o.is_paid ? 'text-emerald-700' : 'text-rose-600'}">${o.is_paid ? '✔ تم الدفع' : '❌ لم يدفع'}</span></span>
                                             <span class="px-2.5 py-1 rounded-xl text-[11px] ${o.is_delivered ? 'bg-emerald-100 text-emerald-900' : (ps && ps.is_received ? 'bg-indigo-100 text-indigo-900' : 'bg-amber-100 text-amber-900')}">
-                                                ${o.is_delivered ? '✔ تم الاستلام' : (ps && ps.is_received ? '✨ جاهزة للاستلام!' : '🚚 بالطريق')}
+                                                ${o.is_delivered ? '✔ تم الاستلام' : (ps && ps.is_received ? '✨ جاهزة للاستلاستلام!' : '🚚 بالطريق')}
                                             </span>
                                         </div>
                                     </div>
@@ -1099,7 +1211,7 @@
             `;
         }
 
-        // دوال الإدارة والتحقق من كلمة المرور من جدول system_settings في الداتا بيس
+        // دوال الإدارة والتحقق من كلمة المرور بأمان تام
         function openLoginModal() { document.getElementById('login-modal').classList.remove('hidden'); }
         function closeLoginModal() { document.getElementById('login-modal').classList.add('hidden'); }
 
@@ -1117,7 +1229,7 @@
                     .eq('setting_key', 'admin_password')
                     .single();
 
-                if (error || !data) throw new Error("تعذر جلب كلمة المرور من قاعدة البيانات");
+                if (error || !data) throw new Error("تعذر التحقق");
 
                 if (passInput === data.setting_value) {
                     sessionStorage.setItem("isUnlocked", "true");
@@ -1625,7 +1737,7 @@
                 if (client && client.phone) {
                     let phone = client.phone.trim();
                     if (phone.startsWith('0')) phone = '972' + phone.substring(1);
-                    const message = `مرحباً ${client.name} 🌸\nنود إعلامك بأن طلبيتك ضمن شحنة رقم (${shipmentCode}) (${order.notes || 'القطع'}) قد وصلت من البريد وهي جاهزة للاستلام! 📦✨`;
+                    const message = `مرحباً ${client.name} 🌸\nنود إعلامك بأن طلبيتك ضمن شحنة رقم (${shipmentCode}) (${order.notes || 'القطع'}) قد وصلت من البريد وهي جاهزة للاستلاستلام! 📦✨`;
                     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
                 }
             });
@@ -2193,7 +2305,7 @@
             const id = document.getElementById('expense-id').value;
             const data = {
                 title: document.getElementById('expense-form-title').value,
-                date: document.getElementById('expense-form-date.value') || document.getElementById('expense-form-date').value,
+                date: document.getElementById('expense-form-date').value,
                 amount: parseFloat(document.getElementById('expense-form-amount').value),
                 notes: document.getElementById('expense-form-notes').value
             };
